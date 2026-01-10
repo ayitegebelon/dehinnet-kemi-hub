@@ -2,95 +2,128 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
+/* ደህንነት ኬሚ - Dehinnet Kemi Design System
+   Ethiopian-inspired chemistry safety platform
+   All colors MUST be HSL.
 */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-
+    /* Core Safety Green - Primary brand color */
+    --safety-green: 145 63% 42%;
+    --safety-green-light: 145 63% 52%;
+    --safety-green-dark: 145 63% 32%;
+    --safety-green-glow: 145 80% 60%;
+    
+    /* Science Blue - Secondary */
+    --science-blue: 204 70% 45%;
+    --science-blue-light: 204 70% 55%;
+    --science-blue-dark: 204 70% 35%;
+    
+    /* Ethiopian Heritage Colors */
+    --ethiopian-gold: 45 100% 50%;
+    --ethiopian-gold-light: 45 100% 60%;
+    --ethiopian-red: 0 75% 55%;
+    --ethiopian-red-light: 0 75% 65%;
+    
+    /* Warning/Alert Colors */
+    --warning-orange: 35 95% 55%;
+    --danger-red: 0 84% 60%;
+    --success-green: 145 63% 42%;
+    
+    /* Neutral Palette */
+    --background: 150 20% 98%;
+    --foreground: 150 25% 10%;
+    
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
+    --card-foreground: 150 25% 10%;
+    
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
-
-    --radius: 0.5rem;
-
-    --sidebar-background: 0 0% 98%;
-
-    --sidebar-foreground: 240 5.3% 26.1%;
-
-    --sidebar-primary: 240 5.9% 10%;
-
-    --sidebar-primary-foreground: 0 0% 98%;
-
-    --sidebar-accent: 240 4.8% 95.9%;
-
-    --sidebar-accent-foreground: 240 5.9% 10%;
-
-    --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --popover-foreground: 150 25% 10%;
+    
+    --primary: 145 63% 42%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 45 100% 50%;
+    --secondary-foreground: 150 25% 10%;
+    
+    --muted: 150 15% 92%;
+    --muted-foreground: 150 15% 40%;
+    
+    --accent: 204 70% 45%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 150 20% 88%;
+    --input: 150 20% 88%;
+    --ring: 145 63% 42%;
+    
+    --radius: 0.75rem;
+    
+    /* Sidebar */
+    --sidebar-background: 150 20% 97%;
+    --sidebar-foreground: 150 25% 15%;
+    --sidebar-primary: 145 63% 42%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 145 30% 92%;
+    --sidebar-accent-foreground: 145 63% 32%;
+    --sidebar-border: 150 20% 88%;
+    --sidebar-ring: 145 63% 42%;
+    
+    /* Custom gradients */
+    --gradient-primary: linear-gradient(135deg, hsl(145 63% 42%), hsl(145 63% 52%));
+    --gradient-hero: linear-gradient(135deg, hsl(145 63% 38%), hsl(204 70% 45%));
+    --gradient-ethiopian: linear-gradient(135deg, hsl(145 63% 42%), hsl(45 100% 50%), hsl(0 75% 55%));
+    --gradient-glass: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+    
+    /* Shadows */
+    --shadow-glow: 0 0 30px hsl(145 63% 42% / 0.3);
+    --shadow-card: 0 4px 20px hsl(150 20% 10% / 0.08);
+    --shadow-card-hover: 0 8px 30px hsl(150 20% 10% / 0.12);
+    --shadow-button: 0 4px 15px hsl(145 63% 42% / 0.4);
   }
 
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
+    --background: 150 25% 6%;
+    --foreground: 150 15% 95%;
+    
+    --card: 150 25% 9%;
+    --card-foreground: 150 15% 95%;
+    
+    --popover: 150 25% 9%;
+    --popover-foreground: 150 15% 95%;
+    
+    --primary: 145 63% 50%;
+    --primary-foreground: 150 25% 5%;
+    
+    --secondary: 45 100% 50%;
+    --secondary-foreground: 150 25% 5%;
+    
+    --muted: 150 20% 15%;
+    --muted-foreground: 150 15% 60%;
+    
+    --accent: 204 70% 50%;
+    --accent-foreground: 0 0% 100%;
+    
+    --destructive: 0 75% 50%;
+    --destructive-foreground: 0 0% 100%;
+    
+    --border: 150 20% 18%;
+    --input: 150 20% 18%;
+    --ring: 145 63% 50%;
+    
+    --sidebar-background: 150 25% 8%;
+    --sidebar-foreground: 150 15% 90%;
+    --sidebar-primary: 145 63% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-accent: 150 20% 15%;
+    --sidebar-accent-foreground: 145 63% 60%;
+    --sidebar-border: 150 20% 18%;
+    --sidebar-ring: 145 63% 50%;
   }
 }
 
@@ -98,8 +131,196 @@ All colors MUST be HSL.
   * {
     @apply border-border;
   }
-
+  
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
+    font-family: 'Inter', 'Noto Sans Ethiopic', system-ui, sans-serif;
+  }
+  
+  /* Amharic text styling */
+  .font-amharic {
+    font-family: 'Noto Sans Ethiopic', 'Nyala', sans-serif;
+  }
+}
+
+@layer components {
+  /* Hero section styles */
+  .hero-gradient {
+    background: linear-gradient(135deg, hsl(var(--safety-green)) 0%, hsl(var(--science-blue)) 100%);
+  }
+  
+  .hero-pattern {
+    background-image: 
+      radial-gradient(circle at 20% 80%, hsl(var(--ethiopian-gold) / 0.15) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, hsl(var(--science-blue) / 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, hsl(var(--safety-green) / 0.05) 0%, transparent 50%);
+  }
+  
+  /* Glass morphism */
+  .glass {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+  }
+  
+  .glass-card {
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: var(--shadow-card);
+  }
+  
+  /* Safety badge styles */
+  .safety-badge {
+    @apply inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-sm font-medium;
+    background: hsl(var(--safety-green) / 0.1);
+    color: hsl(var(--safety-green-dark));
+    border: 1px solid hsl(var(--safety-green) / 0.2);
+  }
+  
+  /* Ethiopian heritage stripe */
+  .ethiopian-stripe {
+    height: 4px;
+    background: linear-gradient(90deg, 
+      hsl(var(--safety-green)) 0%, 
+      hsl(var(--safety-green)) 33%, 
+      hsl(var(--ethiopian-gold)) 33%, 
+      hsl(var(--ethiopian-gold)) 66%, 
+      hsl(var(--ethiopian-red)) 66%, 
+      hsl(var(--ethiopian-red)) 100%
+    );
+  }
+  
+  /* Element card for periodic table */
+  .element-card {
+    @apply relative rounded-lg p-2 transition-all duration-300 cursor-pointer;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+  }
+  
+  .element-card:hover {
+    transform: translateY(-2px) scale(1.02);
+    box-shadow: var(--shadow-card-hover);
+  }
+  
+  /* Safety checklist item */
+  .safety-item {
+    @apply flex items-center gap-3 p-4 rounded-lg transition-all duration-200;
+    background: hsl(var(--muted) / 0.5);
+    border: 1px solid transparent;
+  }
+  
+  .safety-item:hover {
+    background: hsl(var(--muted));
+    border-color: hsl(var(--safety-green) / 0.2);
+  }
+  
+  .safety-item.completed {
+    background: hsl(var(--safety-green) / 0.1);
+    border-color: hsl(var(--safety-green) / 0.3);
+  }
+  
+  /* Recipe card */
+  .recipe-card {
+    @apply relative overflow-hidden rounded-xl transition-all duration-300;
+    background: hsl(var(--card));
+    border: 1px solid hsl(var(--border));
+    box-shadow: var(--shadow-card);
+  }
+  
+  .recipe-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-card-hover);
+  }
+  
+  /* Emergency button */
+  .emergency-button {
+    @apply fixed bottom-6 right-6 z-50 flex items-center justify-center w-16 h-16 rounded-full;
+    background: hsl(var(--danger-red));
+    box-shadow: 0 4px 20px hsl(var(--danger-red) / 0.5);
+    animation: pulse-emergency 2s ease-in-out infinite;
+  }
+  
+  @keyframes pulse-emergency {
+    0%, 100% {
+      box-shadow: 0 4px 20px hsl(var(--danger-red) / 0.5);
+    }
+    50% {
+      box-shadow: 0 4px 30px hsl(var(--danger-red) / 0.8);
+    }
+  }
+  
+  /* Floating animation */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  
+  .animate-float {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  /* Gradient text */
+  .gradient-text {
+    background: linear-gradient(135deg, hsl(var(--safety-green)) 0%, hsl(var(--science-blue)) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  /* Shimmer effect */
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+  
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      hsl(var(--muted)) 0%,
+      hsl(var(--background)) 50%,
+      hsl(var(--muted)) 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s ease-in-out infinite;
+  }
+  
+  /* Tab indicator animation */
+  .tab-indicator {
+    @apply absolute bottom-0 left-0 h-0.5 rounded-full transition-all duration-300;
+    background: hsl(var(--primary));
+  }
+}
+
+@layer utilities {
+  /* Custom scrollbar */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.5);
   }
 }
