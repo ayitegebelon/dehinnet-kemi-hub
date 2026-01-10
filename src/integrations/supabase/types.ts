@@ -14,16 +14,349 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      achievements: {
+        Row: {
+          achievement_type: string
+          awarded_at: string | null
+          icon: string | null
+          id: string
+          name_am: string
+          name_en: string
+          user_id: string
+        }
+        Insert: {
+          achievement_type: string
+          awarded_at?: string | null
+          icon?: string | null
+          id?: string
+          name_am: string
+          name_en: string
+          user_id: string
+        }
+        Update: {
+          achievement_type?: string
+          awarded_at?: string | null
+          icon?: string | null
+          id?: string
+          name_am?: string
+          name_en?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      emergency_contacts: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_primary: boolean | null
+          name: string
+          phone: string
+          relationship: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          name: string
+          phone: string
+          relationship?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_primary?: boolean | null
+          name?: string
+          phone?: string
+          relationship?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      experiments: {
+        Row: {
+          created_at: string | null
+          end_time: string | null
+          id: string
+          notes: string | null
+          recipe_id: string | null
+          safety_checklist_completed: boolean | null
+          safety_incidents: Json | null
+          start_time: string | null
+          status: string | null
+          success: boolean | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
+          notes?: string | null
+          recipe_id?: string | null
+          safety_checklist_completed?: boolean | null
+          safety_incidents?: Json | null
+          start_time?: string | null
+          status?: string | null
+          success?: boolean | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          end_time?: string | null
+          id?: string
+          notes?: string | null
+          recipe_id?: string | null
+          safety_checklist_completed?: boolean | null
+          safety_incidents?: Json | null
+          start_time?: string | null
+          status?: string | null
+          success?: boolean | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "experiments_recipe_id_fkey"
+            columns: ["recipe_id"]
+            isOneToOne: false
+            referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          age: number | null
+          avatar_url: string | null
+          created_at: string | null
+          email: string
+          full_name: string
+          id: string
+          phone: string | null
+          preferred_language: string | null
+          safety_score: number | null
+          skill_level: Database["public"]["Enums"]["skill_level"] | null
+          subscription_expiry: string | null
+          subscription_tier:
+            | Database["public"]["Enums"]["subscription_tier"]
+            | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          age?: number | null
+          avatar_url?: string | null
+          created_at?: string | null
+          email: string
+          full_name: string
+          id?: string
+          phone?: string | null
+          preferred_language?: string | null
+          safety_score?: number | null
+          skill_level?: Database["public"]["Enums"]["skill_level"] | null
+          subscription_expiry?: string | null
+          subscription_tier?:
+            | Database["public"]["Enums"]["subscription_tier"]
+            | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          age?: number | null
+          avatar_url?: string | null
+          created_at?: string | null
+          email?: string
+          full_name?: string
+          id?: string
+          phone?: string | null
+          preferred_language?: string | null
+          safety_score?: number | null
+          skill_level?: Database["public"]["Enums"]["skill_level"] | null
+          subscription_expiry?: string | null
+          subscription_tier?:
+            | Database["public"]["Enums"]["subscription_tier"]
+            | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      recipes: {
+        Row: {
+          category: string
+          created_at: string | null
+          description_am: string | null
+          description_en: string | null
+          difficulty: Database["public"]["Enums"]["difficulty_level"]
+          equipment_required: Json | null
+          estimated_time_minutes: number | null
+          id: string
+          image_url: string | null
+          ingredients: Json
+          is_premium: boolean | null
+          name_am: string
+          name_en: string
+          safety_requirements: Json
+          steps: Json
+          success_rate_percent: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string | null
+          description_am?: string | null
+          description_en?: string | null
+          difficulty?: Database["public"]["Enums"]["difficulty_level"]
+          equipment_required?: Json | null
+          estimated_time_minutes?: number | null
+          id?: string
+          image_url?: string | null
+          ingredients: Json
+          is_premium?: boolean | null
+          name_am: string
+          name_en: string
+          safety_requirements: Json
+          steps: Json
+          success_rate_percent?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string | null
+          description_am?: string | null
+          description_en?: string | null
+          difficulty?: Database["public"]["Enums"]["difficulty_level"]
+          equipment_required?: Json | null
+          estimated_time_minutes?: number | null
+          id?: string
+          image_url?: string | null
+          ingredients?: Json
+          is_premium?: boolean | null
+          name_am?: string
+          name_en?: string
+          safety_requirements?: Json
+          steps?: Json
+          success_rate_percent?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      safety_certifications: {
+        Row: {
+          certification_type: string
+          expires_at: string | null
+          id: string
+          level: string
+          passed_at: string | null
+          score: number | null
+          user_id: string
+        }
+        Insert: {
+          certification_type: string
+          expires_at?: string | null
+          id?: string
+          level: string
+          passed_at?: string | null
+          score?: number | null
+          user_id: string
+        }
+        Update: {
+          certification_type?: string
+          expires_at?: string | null
+          id?: string
+          level?: string
+          passed_at?: string | null
+          score?: number | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      safety_incidents: {
+        Row: {
+          chemicals_involved: Json | null
+          description: string | null
+          experiment_id: string | null
+          id: string
+          incident_type: string
+          reported_at: string | null
+          resolved: boolean | null
+          response_taken: Json | null
+          severity: string | null
+          user_id: string
+        }
+        Insert: {
+          chemicals_involved?: Json | null
+          description?: string | null
+          experiment_id?: string | null
+          id?: string
+          incident_type: string
+          reported_at?: string | null
+          resolved?: boolean | null
+          response_taken?: Json | null
+          severity?: string | null
+          user_id: string
+        }
+        Update: {
+          chemicals_involved?: Json | null
+          description?: string | null
+          experiment_id?: string | null
+          id?: string
+          incident_type?: string
+          reported_at?: string | null
+          resolved?: boolean | null
+          response_taken?: Json | null
+          severity?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "safety_incidents_experiment_id_fkey"
+            columns: ["experiment_id"]
+            isOneToOne: false
+            referencedRelation: "experiments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_roles: {
+        Row: {
+          created_at: string | null
+          id: string
+          role: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          role?: Database["public"]["Enums"]["app_role"]
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      has_role: {
+        Args: {
+          _role: Database["public"]["Enums"]["app_role"]
+          _user_id: string
+        }
+        Returns: boolean
+      }
     }
     Enums: {
-      [_ in never]: never
+      app_role: "user" | "admin" | "superadmin"
+      difficulty_level: "beginner" | "intermediate" | "advanced"
+      skill_level: "beginner" | "intermediate" | "advanced"
+      subscription_tier: "free" | "premium" | "institution"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +483,11 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      app_role: ["user", "admin", "superadmin"],
+      difficulty_level: ["beginner", "intermediate", "advanced"],
+      skill_level: ["beginner", "intermediate", "advanced"],
+      subscription_tier: ["free", "premium", "institution"],
+    },
   },
 } as const
