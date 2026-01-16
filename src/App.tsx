@@ -9,6 +9,13 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import Recipes from "./pages/Recipes";
+import PeriodicTablePage from "./pages/PeriodicTablePage";
+import RecipeCalculatorPage from "./pages/RecipeCalculatorPage";
+import SafetyChecklistPage from "./pages/SafetyChecklistPage";
+import Admin from "./pages/Admin";
+import Subscription from "./pages/Subscription";
+import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -19,8 +26,11 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-muted-foreground">Loading...</p>
+        </div>
       </div>
     );
   }
@@ -39,11 +49,13 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/recipes" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/periodic-table" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/calculator" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/safety" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-      <Route path="/profile" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+      <Route path="/recipes" element={<ProtectedRoute><Recipes /></ProtectedRoute>} />
+      <Route path="/periodic-table" element={<ProtectedRoute><PeriodicTablePage /></ProtectedRoute>} />
+      <Route path="/calculator" element={<ProtectedRoute><RecipeCalculatorPage /></ProtectedRoute>} />
+      <Route path="/safety" element={<ProtectedRoute><SafetyChecklistPage /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+      <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
+      <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
