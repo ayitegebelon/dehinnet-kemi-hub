@@ -35,7 +35,13 @@ const Profile: React.FC = () => {
   const { profile, user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    full_name: string;
+    phone: string;
+    age: string;
+    skill_level: 'beginner' | 'intermediate' | 'advanced';
+    preferred_language: string;
+  }>({
     full_name: profile?.full_name || '',
     phone: profile?.phone || '',
     age: profile?.age?.toString() || '',
@@ -234,7 +240,7 @@ const Profile: React.FC = () => {
                       {isEditing ? (
                         <Select
                           value={formData.skill_level}
-                          onValueChange={(v) => setFormData({...formData, skill_level: v})}
+                          onValueChange={(v) => setFormData({...formData, skill_level: v as 'beginner' | 'intermediate' | 'advanced'})}
                         >
                           <SelectTrigger>
                             <SelectValue />
