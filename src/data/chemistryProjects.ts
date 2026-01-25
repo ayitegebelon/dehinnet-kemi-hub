@@ -3,6 +3,23 @@
 export type ProjectLevel = 'beginner' | 'intermediate' | 'advanced';
 export type ProjectCategory = 'electrochemistry' | 'organic' | 'materials' | 'green-chemistry' | 'local-materials' | 'biochemistry';
 
+// Level translations for display
+export const projectLevels: Record<ProjectLevel, { en: string; am: string; or: string }> = {
+  beginner: { en: 'Beginner', am: 'ጀማሪ', or: 'Jalqabaa' },
+  intermediate: { en: 'Intermediate', am: 'መካከለኛ', or: 'Giddugaleessa' },
+  advanced: { en: 'Advanced', am: 'ከፍተኛ', or: "Ol'aanaa" }
+};
+
+// Category translations and icons for display
+export const projectCategories: Record<ProjectCategory, { en: string; am: string; or: string; icon: string }> = {
+  electrochemistry: { en: 'Electrochemistry', am: 'ኤሌክትሮ ኬሚስትሪ', or: 'Elektiroo-keemistririi', icon: '⚡' },
+  organic: { en: 'Organic Chemistry', am: 'ኦርጋኒክ ኬሚስትሪ', or: 'Keemistririi Orgaanikii', icon: '🧪' },
+  materials: { en: 'Materials Science', am: 'የቁሳቁስ ሳይንስ', or: 'Saayinsii Meeshaalee', icon: '🔬' },
+  'green-chemistry': { en: 'Green Chemistry', am: 'አረንጓዴ ኬሚስትሪ', or: 'Keemistririi Magariisa', icon: '🌿' },
+  'local-materials': { en: 'Local Materials', am: 'የአካባቢ ቁሳቁሶች', or: 'Meeshaalee Naannoo', icon: '🏠' },
+  biochemistry: { en: 'Biochemistry', am: 'ባዮኬሚስትሪ', or: 'Bayoo-keemistririi', icon: '🧬' }
+};
+
 export interface ProjectStep {
   stepNumber: number;
   titleEn: string;
