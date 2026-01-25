@@ -1,12 +1,12 @@
 import React from 'react';
 import Layout from '@/components/layout/Layout';
-import PeriodicTable from '@/components/chemistry/PeriodicTable';
+import EnhancedPeriodicTable from '@/components/chemistry/EnhancedPeriodicTable';
 
 const PeriodicTablePage: React.FC = () => {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        <PeriodicTable />
+        <EnhancedPeriodicTable />
       </div>
     </Layout>
   );

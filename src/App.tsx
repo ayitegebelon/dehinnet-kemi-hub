@@ -13,6 +13,7 @@ import Recipes from "./pages/Recipes";
 import PeriodicTablePage from "./pages/PeriodicTablePage";
 import RecipeCalculatorPage from "./pages/RecipeCalculatorPage";
 import SafetyChecklistPage from "./pages/SafetyChecklistPage";
+import ProjectsPage from "./pages/ProjectsPage";
 import Admin from "./pages/Admin";
 import Subscription from "./pages/Subscription";
 import Profile from "./pages/Profile";
@@ -53,6 +54,7 @@ const AppRoutes = () => {
       <Route path="/periodic-table" element={<ProtectedRoute><PeriodicTablePage /></ProtectedRoute>} />
       <Route path="/calculator" element={<ProtectedRoute><RecipeCalculatorPage /></ProtectedRoute>} />
       <Route path="/safety" element={<ProtectedRoute><SafetyChecklistPage /></ProtectedRoute>} />
+      <Route path="/projects" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
