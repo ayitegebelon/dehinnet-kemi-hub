@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import Layout from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { chemistryProjects, projectLevels, projectCategories, ProjectLevel, ProjectCategory } from '@/data/chemistryProjects';
+import { allChemistryProjects, projectLevels, projectCategories, ProjectLevel, ProjectCategory } from '@/data/chemistryProjects';
 import ProjectCard from '@/components/chemistry/ProjectCard';
 import ProjectDetailModal from '@/components/chemistry/ProjectDetailModal';
 import { Input } from '@/components/ui/input';
@@ -25,10 +25,10 @@ const ProjectsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedLevel, setSelectedLevel] = useState<ProjectLevel | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<ProjectCategory | null>(null);
-  const [selectedProject, setSelectedProject] = useState<typeof chemistryProjects[0] | null>(null);
+  const [selectedProject, setSelectedProject] = useState<typeof allChemistryProjects[0] | null>(null);
 
   const filteredProjects = useMemo(() => {
-    return chemistryProjects.filter(project => {
+    return allChemistryProjects.filter(project => {
       const matchesSearch = searchQuery === '' ||
         project.titleEn.toLowerCase().includes(searchQuery.toLowerCase()) ||
         project.titleAm.includes(searchQuery) ||
@@ -71,9 +71,9 @@ const ProjectsPage: React.FC = () => {
               </h1>
               <p className="text-muted-foreground">
                 {getText(
-                  `${chemistryProjects.length} hands-on experiments with 3D animations`,
-                  `${chemistryProjects.length} በ3D አኒሜሽን ያሉ ተግባራዊ ሙከራዎች`,
-                  `Muuxannoo harkaa ${chemistryProjects.length} animeshiinii 3D waliin`
+                  `${allChemistryProjects.length} hands-on experiments with 3D animations`,
+                  `${allChemistryProjects.length} በ3D አኒሜሽን ያሉ ተግባራዊ ሙከራዎች`,
+                  `Muuxannoo harkaa ${allChemistryProjects.length} animeshiinii 3D waliin`
                 )}
               </p>
             </div>
@@ -144,9 +144,9 @@ const ProjectsPage: React.FC = () => {
         <div className="mb-6">
           <p className="text-muted-foreground">
             {getText(
-              `Showing ${filteredProjects.length} of ${chemistryProjects.length} projects`,
-              `ከ${chemistryProjects.length} ${filteredProjects.length} ፕሮጀክቶችን በማሳየት ላይ`,
-              `Pirojektoota ${chemistryProjects.length} keessaa ${filteredProjects.length} agarsiisaa`
+              `Showing ${filteredProjects.length} of ${allChemistryProjects.length} projects`,
+              `ከ${allChemistryProjects.length} ${filteredProjects.length} ፕሮጀክቶችን በማሳየት ላይ`,
+              `Pirojektoota ${allChemistryProjects.length} keessaa ${filteredProjects.length} agarsiisaa`
             )}
           </p>
         </div>
