@@ -1258,11 +1258,22 @@ export const chemistryProjects: ChemistryProject[] = [
   }
 ];
 
+// Import and merge local materials projects
+import { localMaterialsProjects } from './localMaterialsProjects';
+
+// Combined projects array with all projects
+export const allChemistryProjects: ChemistryProject[] = [
+  ...chemistryProjects,
+  ...localMaterialsProjects
+];
+
 export const getProjectsByLevel = (level: ProjectLevel) => 
-  chemistryProjects.filter(p => p.level === level);
+  allChemistryProjects.filter(p => p.level === level);
 
 export const getProjectsByCategory = (category: ProjectCategory) => 
-  chemistryProjects.filter(p => p.category === category);
+  allChemistryProjects.filter(p => p.category === category);
 
 export const getProjectById = (id: string) => 
-  chemistryProjects.find(p => p.id === id);
+  allChemistryProjects.find(p => p.id === id);
+
+export const getAllProjects = () => allChemistryProjects;
