@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ChemistryProject, projectLevels, projectCategories } from '@/data/chemistryProjects';
 import Lab3DEquipment from './Lab3DEquipment';
+import { useProjectSafety } from '@/hooks/useProjectSafety';
 import { 
   Clock, 
   Shield, 
@@ -22,7 +24,9 @@ import {
   ChevronRight,
   BookOpen,
   Lightbulb,
-  TestTube
+  TestTube,
+  Play,
+  Lock
 } from 'lucide-react';
 
 interface ProjectDetailModalProps {
@@ -32,7 +36,21 @@ interface ProjectDetailModalProps {
 
 const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project, onClose }) => {
   const { language } = useLanguage();
+  const navigate = useNavigate();
+  const { isSafetyVerified, setStartContext } = useProjectSafety();
   const [currentStep, setCurrentStep] = useState(0);
+  const [showInstructions, setShowInstructions] = useState(false);
+
+  // Check if safety is verified for this project
+  const safetyVerified = project ? isSafetyVerified(project.id) : false;
+
+  // Reset state when project changes
+  React.useEffect(() => {
+    if (project) {
+      setCurrentStep(0);
+      setShowInstructions(safetyVerified);
+    }
+  }, [project?.id, safetyVerified]);
 
   if (!project) return null;
 
@@ -53,6 +71,16 @@ const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project, onClos
   const getCategoryName = () => {
     const categoryData = projectCategories[project.category];
     return getText(categoryData.en, categoryData.am, categoryData.or);
+  };
+
+  const handleStartProject = () => {
+    // Store project context and navigate to safety checklist
+    setStartContext({
+      projectId: project.id,
+      projectTitle: getTitle(),
+    });
+    onClose();
+    navigate('/safety');
   };
 
   const step = project.steps[currentStep];
@@ -108,6 +136,47 @@ const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project, onClos
             </DialogHeader>
 
             <p className="text-muted-foreground mt-4">{getDescription()}</p>
+
+            {/* Start Project / Safety Status Section */}
+            {!showInstructions ? (
+              <Card className="mt-6 p-6 border-2 border-dashed border-warning/50 bg-warning/5">
+                <div className="flex flex-col items-center text-center gap-4">
+                  <div className="w-16 h-16 rounded-full bg-warning/20 flex items-center justify-center">
+                    <Lock className="w-8 h-8 text-warning" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold mb-1">
+                      {getText('Safety Verification Required', 'የደህንነት ማረጋገጫ ያስፈልጋል', 'Mirkaneessa Nageenya Barbaachisa')}
+                    </h3>
+                    <p className="text-muted-foreground text-sm max-w-md">
+                      {getText(
+                        'Complete the safety checklist before accessing step-by-step instructions for this experiment.',
+                        'የዚህን ሙከራ ደረጃ በደረጃ መመሪያዎች ከማግኘትዎ በፊት የደህንነት ዝርዝሩን ያጠናቅቁ።',
+                        'Qajeelfama tarkaanfii fi tarkaanfii muuxannoo kanaatti argachuun dura tarree nageenya xumurii.'
+                      )}
+                    </p>
+                  </div>
+                  <Button size="lg" onClick={handleStartProject} className="gap-2">
+                    <Play className="w-5 h-5" />
+                    {getText('Start Project', 'ፕሮጀክቱን ጀምር', 'Pirojektii Jalqabi')}
+                  </Button>
+                </div>
+              </Card>
+            ) : (
+              <Alert className="mt-6 border-primary/50 bg-primary/5">
+                <CheckCircle2 className="h-5 w-5 text-primary" />
+                <AlertTitle className="text-primary">
+                  {getText('Safety Verified!', 'ደህንነት ተረጋግጧል!', 'Nageenya Mirkanaa\'e!')}
+                </AlertTitle>
+                <AlertDescription>
+                  {getText(
+                    'You can now follow the step-by-step instructions below.',
+                    'አሁን ከታች ያሉትን ደረጃ በደረጃ መመሪያዎች መከተል ይችላሉ።',
+                    'Amma qajeelfama tarkaanfii tarkaanfiin gadii hordofuu dandeessa.'
+                  )}
+                </AlertDescription>
+              </Alert>
+            )}
 
             <Tabs defaultValue="steps" className="mt-6">
               <TabsList className="grid w-full grid-cols-4">
