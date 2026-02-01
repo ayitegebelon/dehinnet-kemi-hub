@@ -1,4 +1,5 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { allChemistryProjects, projectLevels, projectCategories, ProjectLevel, ProjectCategory } from '@/data/chemistryProjects';
@@ -7,6 +8,8 @@ import ProjectDetailModal from '@/components/chemistry/ProjectDetailModal';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { useProjectSafety } from '@/hooks/useProjectSafety';
+import { toast } from 'sonner';
 import { 
   Search, 
   Filter, 
@@ -19,6 +22,9 @@ import {
 
 const ProjectsPage: React.FC = () => {
   const { language } = useLanguage();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { getStartContext, clearStartContext, isSafetyVerified } = useProjectSafety();
+  
   const isAmharic = language === 'am';
   const isOromo = language === 'or';
 
@@ -26,6 +32,32 @@ const ProjectsPage: React.FC = () => {
   const [selectedLevel, setSelectedLevel] = useState<ProjectLevel | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<ProjectCategory | null>(null);
   const [selectedProject, setSelectedProject] = useState<typeof allChemistryProjects[0] | null>(null);
+
+  const getText = (en: string, am: string, or: string) => {
+    if (isAmharic) return am;
+    if (isOromo) return or;
+    return en;
+  };
+
+  // Check if returning from safety checklist with a verified project
+  useEffect(() => {
+    const context = getStartContext();
+    if (context && isSafetyVerified(context.projectId)) {
+      // Find and open the project that was just verified
+      const project = allChemistryProjects.find(p => p.id === context.projectId);
+      if (project) {
+        setSelectedProject(project);
+        toast.success(
+          getText(
+            `${context.projectTitle} is now ready! Follow the instructions.`,
+            `${context.projectTitle} አሁን ዝግጁ ነው! መመሪያዎቹን ይከተሉ።`,
+            `${context.projectTitle} amma qophaa'e! Qajeelfama hordofi.`
+          )
+        );
+      }
+      clearStartContext();
+    }
+  }, [getStartContext, isSafetyVerified, clearStartContext, getText]);
 
   const filteredProjects = useMemo(() => {
     return allChemistryProjects.filter(project => {
@@ -42,11 +74,6 @@ const ProjectsPage: React.FC = () => {
     });
   }, [searchQuery, selectedLevel, selectedCategory]);
 
-  const getText = (en: string, am: string, or: string) => {
-    if (isAmharic) return am;
-    if (isOromo) return or;
-    return en;
-  };
 
   const clearFilters = () => {
     setSearchQuery('');
