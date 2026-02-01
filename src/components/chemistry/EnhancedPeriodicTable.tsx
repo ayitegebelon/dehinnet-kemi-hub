@@ -6,7 +6,18 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Search, Atom, Zap, Thermometer, Scale, X, Info, Sparkles, Grid3X3 } from 'lucide-react';
+import { Search, Atom, Zap, Thermometer, Scale, X, Info, Sparkles, Grid3X3, Beaker } from 'lucide-react';
+import MolecularViewer3D from './MolecularViewer3D';
+
+// Element to molecule mapping for quick visualization
+const ELEMENT_MOLECULE_MAP: Record<string, string> = {
+  H: 'water',
+  O: 'water',
+  C: 'methane',
+  N: 'ammonia',
+  Na: 'sodiumChloride',
+  Cl: 'sodiumChloride',
+};
 
 // Enhanced Element Card with 3D hover effect
 const ElementCard: React.FC<{
@@ -329,8 +340,30 @@ const EnhancedPeriodicTable: React.FC = () => {
   const lanthanides = elements.filter(el => el.category === 'lanthanide');
   const actinides = elements.filter(el => el.category === 'actinide');
   
+  const [showMolecularViewer, setShowMolecularViewer] = useState(false);
+  
   return (
     <div className="space-y-6">
+      {/* 3D Molecular Viewer Section */}
+      <div className="relative">
+        <div className="flex items-center justify-between mb-4">
+          <Button
+            variant={showMolecularViewer ? 'default' : 'outline'}
+            onClick={() => setShowMolecularViewer(!showMolecularViewer)}
+            className="gap-2"
+          >
+            <Beaker className="w-4 h-4" />
+            {isAmharic ? (showMolecularViewer ? '3D ቪወር ደብቅ' : '3D ሞለኪውል ቪወር') : (showMolecularViewer ? 'Hide 3D Viewer' : '3D Molecular Viewer')}
+          </Button>
+        </div>
+        
+        {showMolecularViewer && (
+          <div className="mb-8 animate-fade-in">
+            <MolecularViewer3D />
+          </div>
+        )}
+      </div>
+      
       {/* Header */}
       <div className="flex flex-col lg:flex-row gap-4 items-start lg:items-center justify-between">
         <div className="flex items-center gap-4">
