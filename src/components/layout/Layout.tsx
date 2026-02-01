@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
 import Header from './Header';
 import Footer from './Footer';
+import BottomNavigation from './BottomNavigation';
 import EmergencyButton from '@/components/safety/EmergencyButton';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -15,11 +16,12 @@ const Layout: React.FC<LayoutProps> = ({ children, showFooter = true }) => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <main className="flex-1">
+      <main className="flex-1 pb-20">
         {children}
       </main>
       {showFooter && <Footer />}
       {user && <EmergencyButton />}
+      <BottomNavigation />
     </div>
   );
 };
