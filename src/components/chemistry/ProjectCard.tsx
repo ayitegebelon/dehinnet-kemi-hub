@@ -12,15 +12,18 @@ import {
   Star, 
   ChevronRight,
   AlertTriangle,
-  Beaker
+  Beaker,
+  CheckCircle2,
+  ShieldCheck
 } from 'lucide-react';
 
 interface ProjectCardProps {
   project: ChemistryProject;
   onClick: () => void;
+  isSafetyVerified?: boolean;
 }
 
-const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
+const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick, isSafetyVerified = false }) => {
   const { language } = useLanguage();
 
   const getTitle = () => {
@@ -72,6 +75,19 @@ const ProjectCard: React.FC<ProjectCardProps> = ({ project, onClick }) => {
       {/* 3D Equipment Preview */}
       <div className="relative h-40 bg-gradient-to-b from-muted/50 to-muted/20 flex items-center justify-center overflow-hidden">
         <Lab3DEquipment type={project.animation3D} size="md" />
+        
+        {/* Safety verified indicator */}
+        {isSafetyVerified && (
+          <div className="absolute top-3 left-3 z-10">
+            <Badge 
+              variant="default" 
+              className="bg-safety-green text-primary-foreground border-safety-green/50 flex items-center gap-1 animate-pulse"
+            >
+              <ShieldCheck className="w-3 h-3" />
+              {language === 'am' ? 'ደህንነት ተረጋግጧል' : language === 'or' ? 'Nageenya Mirkanaa\'e' : 'Safety Verified'}
+            </Badge>
+          </div>
+        )}
         
         {/* Project icon overlay */}
         <div className="absolute top-3 right-3 text-3xl opacity-80 group-hover:scale-125 transition-transform duration-300">
