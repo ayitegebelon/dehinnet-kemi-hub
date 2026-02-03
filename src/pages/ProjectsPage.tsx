@@ -186,6 +186,7 @@ const ProjectsPage: React.FC = () => {
                 key={project.id}
                 project={project}
                 onClick={() => setSelectedProject(project)}
+                isSafetyVerified={isSafetyVerified(project.id)}
               />
             ))}
           </div>
