@@ -4,7 +4,23 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { Shield, FlaskConical, Atom, Calculator, ArrowRight, CheckCircle } from 'lucide-react';
 import Layout from '@/components/layout/Layout';
+import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 import logo from '@/assets/logo.png';
+
+const ScrollSection: React.FC<{ children: React.ReactNode; delay?: number; className?: string }> = ({ children, delay = 0, className = '' }) => {
+  const { ref, isVisible } = useScrollAnimation();
+  return (
+    <div
+      ref={ref}
+      className={`transition-all duration-700 ease-out ${className} ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
+      }`}
+      style={{ transitionDelay: `${delay}ms` }}
+    >
+      {children}
+    </div>
+  );
+};
 
 const Index: React.FC = () => {
   const { t, language } = useLanguage();
@@ -28,10 +44,10 @@ const Index: React.FC = () => {
               <h1 className="text-4xl md:text-6xl font-bold mb-4 font-amharic">{t('hero.title')}</h1>
               <p className="text-2xl md:text-3xl font-light opacity-90 font-amharic">{t('hero.slogan')}</p>
             </div>
-            <p className="text-lg md:text-xl opacity-80 mb-10 max-w-xl mx-auto animate-fade-in" style={{ animationDelay: '0.2s' }}>
+            <p className="text-lg md:text-xl opacity-80 mb-10 max-w-xl mx-auto animate-fade-in delay-200">
               {t('hero.subtitle')}
             </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in" style={{ animationDelay: '0.4s' }}>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in delay-400">
               <Button size="lg" variant="secondary" asChild className="text-lg px-8">
                 <Link to="/signup">{t('hero.cta')} <ArrowRight className="ml-2 h-5 w-5" /></Link>
               </Button>
@@ -46,18 +62,22 @@ const Index: React.FC = () => {
       {/* Features */}
       <section className="py-20 bg-background">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            {language === 'am' ? 'ዋና ባህሪያት' : 'Key Features'}
-          </h2>
+          <ScrollSection>
+            <h2 className="text-3xl font-bold text-center mb-12 font-display">
+              {language === 'am' ? 'ዋና ባህሪያት' : 'Key Features'}
+            </h2>
+          </ScrollSection>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {features.map((feature, i) => (
-              <div key={i} className="glass-card rounded-xl p-6 text-center hover:shadow-card-hover transition-all">
-                <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-                  <feature.icon className="h-7 w-7 text-primary" />
+              <ScrollSection key={i} delay={i * 100}>
+                <div className="glass-card rounded-xl p-6 text-center hover:shadow-card-hover transition-all h-full">
+                  <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
+                    <feature.icon className="h-7 w-7 text-primary" />
+                  </div>
+                  <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
+                  <p className="text-muted-foreground text-sm">{feature.desc}</p>
                 </div>
-                <h3 className="font-semibold text-lg mb-2">{feature.title}</h3>
-                <p className="text-muted-foreground text-sm">{feature.desc}</p>
-              </div>
+              </ScrollSection>
             ))}
           </div>
         </div>
@@ -66,15 +86,17 @@ const Index: React.FC = () => {
       {/* CTA */}
       <section className="py-16 bg-primary text-primary-foreground">
         <div className="container mx-auto px-4 text-center">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4 font-amharic">
-            {language === 'am' ? 'ዛሬ ጀምር!' : 'Start Today!'}
-          </h2>
-          <p className="mb-8 opacity-90">
-            {language === 'am' ? 'በነጻ ተመዝገብ እና የኬሚስትሪ ጉዞህን ጀምር' : 'Sign up for free and begin your chemistry journey'}
-          </p>
-          <Button size="lg" variant="secondary" asChild>
-            <Link to="/signup">{t('nav.signup')} <CheckCircle className="ml-2 h-5 w-5" /></Link>
-          </Button>
+          <ScrollSection>
+            <h2 className="text-2xl md:text-3xl font-bold mb-4 font-amharic">
+              {language === 'am' ? 'ዛሬ ጀምር!' : 'Start Today!'}
+            </h2>
+            <p className="mb-8 opacity-90">
+              {language === 'am' ? 'በነጻ ተመዝገብ እና የኬሚስትሪ ጉዞህን ጀምር' : 'Sign up for free and begin your chemistry journey'}
+            </p>
+            <Button size="lg" variant="secondary" asChild>
+              <Link to="/signup">{t('nav.signup')} <CheckCircle className="ml-2 h-5 w-5" /></Link>
+            </Button>
+          </ScrollSection>
         </div>
       </section>
     </Layout>
