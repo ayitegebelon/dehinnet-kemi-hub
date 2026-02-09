@@ -17,6 +17,8 @@ import ProjectsPage from "./pages/ProjectsPage";
 import Admin from "./pages/Admin";
 import Subscription from "./pages/Subscription";
 import Profile from "./pages/Profile";
+import LearnPage from "./pages/LearnPage";
+import CourseDetailPage from "./pages/CourseDetailPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -55,6 +57,8 @@ const AppRoutes = () => {
       <Route path="/calculator" element={<ProtectedRoute><RecipeCalculatorPage /></ProtectedRoute>} />
       <Route path="/safety" element={<ProtectedRoute><SafetyChecklistPage /></ProtectedRoute>} />
       <Route path="/projects" element={<ProtectedRoute><ProjectsPage /></ProtectedRoute>} />
+      <Route path="/learn" element={<ProtectedRoute><LearnPage /></ProtectedRoute>} />
+      <Route path="/learn/:courseId" element={<ProtectedRoute><CourseDetailPage /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
