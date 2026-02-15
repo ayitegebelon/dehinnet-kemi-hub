@@ -89,6 +89,85 @@ export type Database = {
         }
         Relationships: []
       }
+      discussion_posts: {
+        Row: {
+          content: string
+          course_id: string | null
+          created_at: string | null
+          id: string
+          likes_count: number | null
+          replies_count: number | null
+          title: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          course_id?: string | null
+          created_at?: string | null
+          id?: string
+          likes_count?: number | null
+          replies_count?: number | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          course_id?: string | null
+          created_at?: string | null
+          id?: string
+          likes_count?: number | null
+          replies_count?: number | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discussion_posts_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      discussion_replies: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          post_id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          post_id: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          post_id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "discussion_replies_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "discussion_posts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       emergency_contacts: {
         Row: {
           created_at: string | null
@@ -165,6 +244,50 @@ export type Database = {
             columns: ["recipe_id"]
             isOneToOne: false
             referencedRelation: "recipes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      flashcards: {
+        Row: {
+          back_am: string
+          back_en: string
+          category: string
+          course_id: string | null
+          created_at: string | null
+          difficulty: string
+          front_am: string
+          front_en: string
+          id: string
+        }
+        Insert: {
+          back_am: string
+          back_en: string
+          category?: string
+          course_id?: string | null
+          created_at?: string | null
+          difficulty?: string
+          front_am: string
+          front_en: string
+          id?: string
+        }
+        Update: {
+          back_am?: string
+          back_en?: string
+          category?: string
+          course_id?: string | null
+          created_at?: string | null
+          difficulty?: string
+          front_am?: string
+          front_en?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "flashcards_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
             referencedColumns: ["id"]
           },
         ]
@@ -450,6 +573,44 @@ export type Database = {
             columns: ["experiment_id"]
             isOneToOne: false
             referencedRelation: "experiments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_flashcard_progress: {
+        Row: {
+          confidence_level: number | null
+          flashcard_id: string
+          id: string
+          last_reviewed_at: string | null
+          next_review_at: string | null
+          review_count: number | null
+          user_id: string
+        }
+        Insert: {
+          confidence_level?: number | null
+          flashcard_id: string
+          id?: string
+          last_reviewed_at?: string | null
+          next_review_at?: string | null
+          review_count?: number | null
+          user_id: string
+        }
+        Update: {
+          confidence_level?: number | null
+          flashcard_id?: string
+          id?: string
+          last_reviewed_at?: string | null
+          next_review_at?: string | null
+          review_count?: number | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_flashcard_progress_flashcard_id_fkey"
+            columns: ["flashcard_id"]
+            isOneToOne: false
+            referencedRelation: "flashcards"
             referencedColumns: ["id"]
           },
         ]
