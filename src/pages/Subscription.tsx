@@ -58,11 +58,20 @@ const Subscription: React.FC = () => {
   const { profile, user } = useAuth();
   const [isPaymentOpen, setIsPaymentOpen] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<'premium' | 'institution'>('premium');
-  const [paymentMethod, setPaymentMethod] = useState<'telebirr' | 'chapa'>('telebirr');
+  const [paymentMethod, setPaymentMethod] = useState<'telebirr' | 'chapa'>('chapa');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
 
   const isAmharic = language === 'am' || language === 'or';
+
+  // Handle payment success redirect
+  React.useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment') === 'success') {
+      toast.success(isAmharic ? 'ክፍያ ተሳክቷል! ምዝገባዎ ተዘምኗል።' : 'Payment successful! Your subscription has been updated.');
+      window.history.replaceState({}, '', '/subscription');
+    }
+  }, []);
 
   const plans = [
     {
@@ -109,32 +118,33 @@ const Subscription: React.FC = () => {
     setIsProcessing(true);
 
     try {
-      // Simulate payment processing
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      if (paymentMethod === 'chapa') {
+        // Real Chapa payment
+        const { data: { session } } = await supabase.auth.getSession();
+        const res = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-chapa-payment`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${session?.access_token}`,
+          },
+          body: JSON.stringify({ plan: selectedPlan, phone: phoneNumber }),
+        });
 
-      // Update profile subscription
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          subscription_tier: selectedPlan,
-          subscription_expiry: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-        })
-        .eq('user_id', user?.id);
-
-      if (error) throw error;
-
-      toast.success(
-        isAmharic 
-          ? `${selectedPlan === 'premium' ? 'ፕሪሚየም' : 'ተቋም'} ምዝገባ ተሳክቷል!`
-          : `Successfully subscribed to ${selectedPlan}!`
-      );
-      setIsPaymentOpen(false);
-      
-      // Reload to update profile
-      window.location.reload();
-    } catch (error) {
+        const data = await res.json();
+        if (data.checkout_url) {
+          // Redirect to Chapa checkout
+          window.location.href = data.checkout_url;
+          return;
+        } else {
+          throw new Error(data.error || 'Payment initialization failed');
+        }
+      } else {
+        // TeleBirr - redirect to TeleBirr app/website
+        toast.info(isAmharic ? 'TeleBirr ክፍያ በቅርቡ ይገኛል' : 'TeleBirr payment coming soon. Please use Chapa.');
+      }
+    } catch (error: any) {
       console.error('Payment error:', error);
-      toast.error(isAmharic ? 'ክፍያ አልተሳካም። እባክዎ እንደገና ይሞክሩ።' : 'Payment failed. Please try again.');
+      toast.error(isAmharic ? 'ክፍያ አልተሳካም። እባክዎ እንደገና ይሞክሩ።' : error.message || 'Payment failed. Please try again.');
     } finally {
       setIsProcessing(false);
     }
