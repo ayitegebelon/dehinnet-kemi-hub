@@ -72,8 +72,8 @@ serve(async (req) => {
         callback_url: `${Deno.env.get("SUPABASE_URL")}/functions/v1/chapa-webhook`,
         return_url: `${req.headers.get("origin") || ""}/subscription?payment=success`,
         customization: {
-          title: `ChemLab ${plan} Subscription`,
-          description: `Monthly ${plan} subscription`,
+          title: plan === "premium" ? "Premium Plan" : "Institution",
+          description: `Monthly ${plan} plan`,
         },
         meta: {
           user_id: user.id,
