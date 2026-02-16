@@ -200,6 +200,21 @@ const CourseDetailPage: React.FC = () => {
               </Card>
             ) : (
               <div className="space-y-6">
+                {/* Video Player */}
+                {activeLesson.video_url && (
+                  <Card className="overflow-hidden">
+                    <div className="aspect-video w-full">
+                      <iframe
+                        src={activeLesson.video_url}
+                        title={language === 'am' ? activeLesson.title_am : activeLesson.title_en}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  </Card>
+                )}
+
                 <Card>
                   <CardHeader>
                     <CardTitle>{language === 'am' ? activeLesson.title_am : activeLesson.title_en}</CardTitle>
