@@ -18,7 +18,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
   Users, FlaskConical, BarChart3, Shield, Search, Plus, Edit, Trash2,
-  Crown, TrendingUp, Activity, DollarSign, BookOpen, Video
+  Crown, TrendingUp, Activity, DollarSign, BookOpen, Video, HelpCircle
 } from 'lucide-react';
 
 interface User {
@@ -64,6 +64,18 @@ interface Lesson {
   content_am: string | null;
 }
 
+
+interface Quiz {
+  id: string;
+  lesson_id: string;
+  question_en: string;
+  question_am: string;
+  options: string[];
+  correct_answer: number;
+  explanation_en: string | null;
+  explanation_am: string | null;
+}
+
 const Admin: React.FC = () => {
   const { t, language } = useLanguage();
   const { isAdmin, isSuperAdmin, user } = useAuth();
@@ -91,6 +103,7 @@ const Admin: React.FC = () => {
     category: 'general', difficulty: 'beginner', is_premium: false,
   });
 
+
   // Lesson form state
   const [isLessonDialogOpen, setIsLessonDialogOpen] = useState(false);
   const [lessonForm, setLessonForm] = useState({
@@ -99,6 +112,15 @@ const Admin: React.FC = () => {
   });
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null);
 
+  // Quiz state
+  const [quizzes, setQuizzes] = useState<Quiz[]>([]);
+  const [isQuizDialogOpen, setIsQuizDialogOpen] = useState(false);
+  const [editingQuiz, setEditingQuiz] = useState<Quiz | null>(null);
+  const [quizForm, setQuizForm] = useState({
+    lesson_id: '', question_en: '', question_am: '',
+    option_0: '', option_1: '', option_2: '', option_3: '',
+    correct_answer: '0', explanation_en: '', explanation_am: '',
+  });
   useEffect(() => {
     if (!isAdmin && !isSuperAdmin) {
       navigate('/dashboard');
@@ -110,17 +132,19 @@ const Admin: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [usersRes, recipesRes, coursesRes, lessonsRes] = await Promise.all([
+      const [usersRes, recipesRes, coursesRes, lessonsRes, quizzesRes] = await Promise.all([
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('recipes').select('*').order('created_at', { ascending: false }),
         supabase.from('courses').select('*').order('created_at', { ascending: false }),
         supabase.from('lessons').select('*').order('order_index'),
+        supabase.from('quizzes').select('*').order('created_at'),
       ]);
 
       if (usersRes.data) setUsers(usersRes.data);
       if (recipesRes.data) setRecipes(recipesRes.data);
       if (coursesRes.data) setCourses(coursesRes.data as Course[]);
       if (lessonsRes.data) setLessons(lessonsRes.data as Lesson[]);
+      if (quizzesRes.data) setQuizzes(quizzesRes.data as Quiz[]);
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Failed to load data');
@@ -256,6 +280,64 @@ const Admin: React.FC = () => {
     } catch (error) { toast.error('Failed to delete lesson'); }
   };
 
+  // Quiz CRUD
+  const handleSaveQuiz = async () => {
+    try {
+      const options = [quizForm.option_0, quizForm.option_1, quizForm.option_2, quizForm.option_3].filter(o => o.trim());
+      const data = {
+        lesson_id: quizForm.lesson_id,
+        question_en: quizForm.question_en,
+        question_am: quizForm.question_am,
+        options,
+        correct_answer: parseInt(quizForm.correct_answer),
+        explanation_en: quizForm.explanation_en || null,
+        explanation_am: quizForm.explanation_am || null,
+      };
+      if (editingQuiz) {
+        const { error } = await supabase.from('quizzes').update(data).eq('id', editingQuiz.id);
+        if (error) throw error;
+        toast.success('Quiz updated!');
+      } else {
+        const { error } = await supabase.from('quizzes').insert(data);
+        if (error) throw error;
+        toast.success('Quiz created!');
+      }
+      setIsQuizDialogOpen(false);
+      setEditingQuiz(null);
+      resetQuizForm();
+      fetchData();
+    } catch (error) { toast.error('Failed to save quiz'); }
+  };
+
+  const resetQuizForm = () => setQuizForm({
+    lesson_id: '', question_en: '', question_am: '',
+    option_0: '', option_1: '', option_2: '', option_3: '',
+    correct_answer: '0', explanation_en: '', explanation_am: '',
+  });
+
+  const openEditQuiz = (quiz: Quiz) => {
+    setEditingQuiz(quiz);
+    const opts = Array.isArray(quiz.options) ? quiz.options : [];
+    setQuizForm({
+      lesson_id: quiz.lesson_id,
+      question_en: quiz.question_en, question_am: quiz.question_am,
+      option_0: opts[0] || '', option_1: opts[1] || '', option_2: opts[2] || '', option_3: opts[3] || '',
+      correct_answer: String(quiz.correct_answer),
+      explanation_en: quiz.explanation_en || '', explanation_am: quiz.explanation_am || '',
+    });
+    setIsQuizDialogOpen(true);
+  };
+
+  const handleDeleteQuiz = async (id: string) => {
+    if (!confirm('Delete this quiz question?')) return;
+    try {
+      const { error } = await supabase.from('quizzes').delete().eq('id', id);
+      if (error) throw error;
+      toast.success('Quiz deleted');
+      fetchData();
+    } catch (error) { toast.error('Failed to delete quiz'); }
+  };
+
   const filteredUsers = users.filter(u =>
     u.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     u.email?.toLowerCase().includes(searchTerm.toLowerCase())
@@ -332,10 +414,11 @@ const Admin: React.FC = () => {
 
         {/* Tabs */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-          <TabsList className="grid w-full grid-cols-4 mb-6">
+          <TabsList className="grid w-full grid-cols-5 mb-6">
             <TabsTrigger value="users" className="flex items-center gap-2"><Users className="h-4 w-4" />{t('admin.users')}</TabsTrigger>
             <TabsTrigger value="recipes" className="flex items-center gap-2"><FlaskConical className="h-4 w-4" />{t('admin.recipes')}</TabsTrigger>
             <TabsTrigger value="courses" className="flex items-center gap-2"><BookOpen className="h-4 w-4" />Courses</TabsTrigger>
+            <TabsTrigger value="quizzes" className="flex items-center gap-2"><HelpCircle className="h-4 w-4" />Quizzes</TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2"><BarChart3 className="h-4 w-4" />{t('admin.analytics')}</TabsTrigger>
           </TabsList>
 
@@ -606,6 +689,90 @@ const Admin: React.FC = () => {
                 </DialogContent>
               </Dialog>
             </div>
+          </TabsContent>
+
+          {/* Quizzes Tab */}
+          <TabsContent value="quizzes">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div><CardTitle className="flex items-center gap-2"><HelpCircle className="h-5 w-5" />Quiz Questions</CardTitle><CardDescription>Manage quiz questions for lessons</CardDescription></div>
+                <Button className="flex items-center gap-2" onClick={() => { setEditingQuiz(null); resetQuizForm(); setQuizForm(prev => ({ ...prev, lesson_id: lessons[0]?.id || '' })); setIsQuizDialogOpen(true); }}>
+                  <Plus className="h-4 w-4" />Add Question
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader><TableRow><TableHead>Question</TableHead><TableHead>Lesson</TableHead><TableHead>Options</TableHead><TableHead>Actions</TableHead></TableRow></TableHeader>
+                    <TableBody>
+                      {quizzes.map((q) => {
+                        const lesson = lessons.find(l => l.id === q.lesson_id);
+                        const opts = Array.isArray(q.options) ? q.options : [];
+                        return (
+                          <TableRow key={q.id}>
+                            <TableCell className="font-medium max-w-xs truncate">{q.question_en}</TableCell>
+                            <TableCell className="text-sm text-muted-foreground">{lesson?.title_en || '—'}</TableCell>
+                            <TableCell><Badge variant="secondary">{opts.length} options</Badge></TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                <Button variant="ghost" size="icon" onClick={() => openEditQuiz(q)}><Edit className="h-4 w-4" /></Button>
+                                <Button variant="ghost" size="icon" onClick={() => handleDeleteQuiz(q.id)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        );
+                      })}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Quiz Dialog */}
+            <Dialog open={isQuizDialogOpen} onOpenChange={setIsQuizDialogOpen}>
+              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader><DialogTitle>{editingQuiz ? 'Edit Quiz Question' : 'Create Quiz Question'}</DialogTitle></DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="space-y-2">
+                    <Label>Lesson</Label>
+                    <Select value={quizForm.lesson_id} onValueChange={(v) => setQuizForm({...quizForm, lesson_id: v})}>
+                      <SelectTrigger><SelectValue placeholder="Select lesson" /></SelectTrigger>
+                      <SelectContent>{lessons.map(l => <SelectItem key={l.id} value={l.id}>{l.title_en}</SelectItem>)}</SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2"><Label>Question (English)</Label><Textarea value={quizForm.question_en} onChange={(e) => setQuizForm({...quizForm, question_en: e.target.value})} /></div>
+                    <div className="space-y-2"><Label>Question (Amharic)</Label><Textarea value={quizForm.question_am} onChange={(e) => setQuizForm({...quizForm, question_am: e.target.value})} /></div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2"><Label>Option A</Label><Input value={quizForm.option_0} onChange={(e) => setQuizForm({...quizForm, option_0: e.target.value})} /></div>
+                    <div className="space-y-2"><Label>Option B</Label><Input value={quizForm.option_1} onChange={(e) => setQuizForm({...quizForm, option_1: e.target.value})} /></div>
+                    <div className="space-y-2"><Label>Option C</Label><Input value={quizForm.option_2} onChange={(e) => setQuizForm({...quizForm, option_2: e.target.value})} /></div>
+                    <div className="space-y-2"><Label>Option D</Label><Input value={quizForm.option_3} onChange={(e) => setQuizForm({...quizForm, option_3: e.target.value})} /></div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label>Correct Answer</Label>
+                    <Select value={quizForm.correct_answer} onValueChange={(v) => setQuizForm({...quizForm, correct_answer: v})}>
+                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="0">A</SelectItem>
+                        <SelectItem value="1">B</SelectItem>
+                        <SelectItem value="2">C</SelectItem>
+                        <SelectItem value="3">D</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2"><Label>Explanation (EN)</Label><Textarea value={quizForm.explanation_en} onChange={(e) => setQuizForm({...quizForm, explanation_en: e.target.value})} /></div>
+                    <div className="space-y-2"><Label>Explanation (AM)</Label><Textarea value={quizForm.explanation_am} onChange={(e) => setQuizForm({...quizForm, explanation_am: e.target.value})} /></div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsQuizDialogOpen(false)}>Cancel</Button>
+                  <Button onClick={handleSaveQuiz}>{editingQuiz ? 'Update' : 'Create'} Question</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           {/* Analytics Tab */}
