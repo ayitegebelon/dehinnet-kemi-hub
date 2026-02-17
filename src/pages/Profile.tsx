@@ -37,12 +37,14 @@ const Profile: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<{
     full_name: string;
+    father_name: string;
     phone: string;
     age: string;
     skill_level: 'beginner' | 'intermediate' | 'advanced';
     preferred_language: string;
   }>({
     full_name: profile?.full_name || '',
+    father_name: (profile as any)?.father_name || '',
     phone: profile?.phone || '',
     age: profile?.age?.toString() || '',
     skill_level: profile?.skill_level || 'beginner',
@@ -58,11 +60,12 @@ const Profile: React.FC = () => {
         .from('profiles')
         .update({
           full_name: formData.full_name,
+          father_name: formData.father_name,
           phone: formData.phone,
           age: formData.age ? parseInt(formData.age) : null,
           skill_level: formData.skill_level as 'beginner' | 'intermediate' | 'advanced',
           preferred_language: formData.preferred_language,
-        })
+        } as any)
         .eq('user_id', user?.id);
 
       if (error) throw error;
@@ -193,6 +196,22 @@ const Profile: React.FC = () => {
                         <div className="flex items-center gap-2 p-2 bg-muted rounded">
                           <User className="w-4 h-4 text-muted-foreground" />
                           <span>{profile?.full_name || '-'}</span>
+                        </div>
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="fatherName">{isAmharic ? 'የአባት ስም' : "Father's Name"}</Label>
+                      {isEditing ? (
+                        <Input
+                          id="fatherName"
+                          value={formData.father_name}
+                          onChange={(e) => setFormData({...formData, father_name: e.target.value})}
+                          placeholder={isAmharic ? 'የአባት ስም' : "Father's name"}
+                        />
+                      ) : (
+                        <div className="flex items-center gap-2 p-2 bg-muted rounded">
+                          <User className="w-4 h-4 text-muted-foreground" />
+                          <span>{(profile as any)?.father_name || '-'}</span>
                         </div>
                       )}
                     </div>
