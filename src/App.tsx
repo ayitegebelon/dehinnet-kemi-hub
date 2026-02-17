@@ -22,6 +22,8 @@ import CourseDetailPage from "./pages/CourseDetailPage";
 import FlashcardsPage from "./pages/FlashcardsPage";
 import DiscussionPage from "./pages/DiscussionPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
+import NotificationsPage from "./pages/NotificationsPage";
+import CertificatesPage from "./pages/CertificatesPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -65,6 +67,8 @@ const AppRoutes = () => {
       <Route path="/flashcards" element={<ProtectedRoute><FlashcardsPage /></ProtectedRoute>} />
       <Route path="/discussion" element={<ProtectedRoute><DiscussionPage /></ProtectedRoute>} />
       <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
+      <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
+      <Route path="/certificates" element={<ProtectedRoute><CertificatesPage /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />

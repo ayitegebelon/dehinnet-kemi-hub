@@ -12,6 +12,7 @@ import {
 import { Globe, Menu } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import ThemeToggle from './ThemeToggle';
+import NotificationBell from '@/components/notifications/NotificationBell';
 import logo from '@/assets/logo.png';
 
 const Header: React.FC = () => {
@@ -40,6 +41,7 @@ const Header: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-1.5">
+            <NotificationBell />
             <ThemeToggle />
 
             <DropdownMenu>
