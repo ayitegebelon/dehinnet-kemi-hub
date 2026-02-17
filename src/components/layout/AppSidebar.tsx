@@ -16,6 +16,7 @@ import {
   User,
   Settings,
   LogOut,
+  Trophy,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -47,6 +48,7 @@ const AppSidebar: React.FC = () => {
     { path: '/projects', label: language === 'am' ? 'ፕሮጀክቶች' : 'Projects', icon: FolderKanban },
     { path: '/learn', label: language === 'am' ? 'ትምህርት' : 'Learn', icon: GraduationCap },
     { path: '/flashcards', label: language === 'am' ? 'ፍላሽ ካርድ' : 'Flashcards', icon: Brain },
+    { path: '/leaderboard', label: language === 'am' ? 'ደረጃ ሰንጠረዥ' : 'Leaderboard', icon: Trophy },
     { path: '/discussion', label: language === 'am' ? 'ውይይት' : 'Discussion', icon: MessagesSquare },
     { path: '/periodic-table', label: t('nav.periodic'), icon: Atom },
     { path: '/calculator', label: t('nav.calculator'), icon: Calculator },

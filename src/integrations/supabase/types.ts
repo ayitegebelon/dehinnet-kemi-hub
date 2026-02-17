@@ -577,6 +577,36 @@ export type Database = {
           },
         ]
       }
+      study_streaks: {
+        Row: {
+          current_streak: number
+          id: string
+          last_study_date: string | null
+          longest_streak: number
+          total_study_days: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          current_streak?: number
+          id?: string
+          last_study_date?: string | null
+          longest_streak?: number
+          total_study_days?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          current_streak?: number
+          id?: string
+          last_study_date?: string | null
+          longest_streak?: number
+          total_study_days?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_flashcard_progress: {
         Row: {
           confidence_level: number | null
@@ -676,7 +706,19 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      leaderboard: {
+        Row: {
+          avatar_url: string | null
+          avg_quiz_score: number | null
+          completed_lessons: number | null
+          current_streak: number | null
+          full_name: string | null
+          skill_level: Database["public"]["Enums"]["skill_level"] | null
+          total_points: number | null
+          user_id: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {
