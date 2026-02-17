@@ -12,8 +12,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
   BookOpen, CheckCircle, Circle, PlayCircle, ArrowLeft,
-  Clock, Trophy, ChevronRight
+  Clock, Trophy, ChevronRight, Shield
 } from 'lucide-react';
+import { useQuizIntegrity } from '@/hooks/useQuizIntegrity';
+import IntegrityBanner from '@/components/quiz/IntegrityBanner';
 
 const CourseDetailPage: React.FC = () => {
   const { courseId } = useParams();
@@ -27,6 +29,7 @@ const CourseDetailPage: React.FC = () => {
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, number>>({});
   const [quizSubmitted, setQuizSubmitted] = useState(false);
+  const { warnings, integrityScore, recordAnswer, getReport, reset: resetIntegrity } = useQuizIntegrity(quizzes.length);
 
   useEffect(() => {
     if (courseId) fetchCourse();
@@ -61,6 +64,7 @@ const CourseDetailPage: React.FC = () => {
     setActiveLesson(lesson);
     setQuizSubmitted(false);
     setQuizAnswers({});
+    resetIntegrity();
     const { data } = await supabase
       .from('quizzes')
       .select('*')
@@ -238,6 +242,7 @@ const CourseDetailPage: React.FC = () => {
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-6">
+                      <IntegrityBanner integrityScore={integrityScore} warnings={warnings} language={language} />
                       {quizzes.map((q, qi) => {
                         const options = Array.isArray(q.options) ? q.options : [];
                         return (
@@ -253,7 +258,12 @@ const CourseDetailPage: React.FC = () => {
                                 return (
                                   <button
                                     key={oi}
-                                    onClick={() => !quizSubmitted && setQuizAnswers(prev => ({ ...prev, [q.id]: oi }))}
+                                    onClick={() => {
+                                      if (!quizSubmitted) {
+                                        setQuizAnswers(prev => ({ ...prev, [q.id]: oi }));
+                                        recordAnswer();
+                                      }
+                                    }}
                                     className={`text-left px-4 py-2.5 rounded-lg border text-sm transition-all ${
                                       isCorrect ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' :
                                       isWrong ? 'border-rose-500 bg-rose-500/10 text-rose-400' :
@@ -285,10 +295,33 @@ const CourseDetailPage: React.FC = () => {
                         </Button>
                       )}
                       {quizSubmitted && (
-                        <div className="text-center p-4 rounded-lg bg-primary/10 border border-primary/20">
-                          <p className="font-medium">
-                            🎉 {language === 'am' ? 'ውጤት' : 'Score'}: {progress[activeLesson.id]?.quiz_score || 0}%
-                          </p>
+                        <div className="space-y-3">
+                          <div className="text-center p-4 rounded-lg bg-primary/10 border border-primary/20">
+                            <p className="font-medium">
+                              🎉 {language === 'am' ? 'ውጤት' : 'Score'}: {progress[activeLesson.id]?.quiz_score || 0}%
+                            </p>
+                          </div>
+                          {integrityScore < 100 && (
+                            <div className={`p-3 rounded-lg border text-sm ${
+                              integrityScore < 60 
+                                ? 'bg-red-500/10 border-red-500/20 text-red-400' 
+                                : 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+                            }`}>
+                              <div className="flex items-center gap-2">
+                                <Shield className="h-4 w-4" />
+                                <span className="font-medium">
+                                  {language === 'am' ? 'የታማኝነት ውጤት' : 'Integrity Score'}: {integrityScore}%
+                                </span>
+                              </div>
+                              {integrityScore < 60 && (
+                                <p className="text-xs mt-1 opacity-80">
+                                  {language === 'am' 
+                                    ? '⚠️ ያልተለመደ እንቅስቃሴ ተመዝግቧል። ይህ ለመምህርዎ ሪፖርት ሊደረግ ይችላል።'
+                                    : '⚠️ Unusual activity was recorded. This may be flagged for review.'}
+                                </p>
+                              )}
+                            </div>
+                          )}
                         </div>
                       )}
                     </CardContent>

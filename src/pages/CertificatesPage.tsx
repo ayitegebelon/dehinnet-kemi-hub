@@ -17,18 +17,21 @@ const CertificatesPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [fatherName, setFatherName] = useState<string>('');
 
   useEffect(() => { if (user) fetchData(); }, [user]);
 
   const fetchData = async () => {
-    const [certsRes, coursesRes, lessonsRes, progressRes] = await Promise.all([
+    const [certsRes, coursesRes, lessonsRes, progressRes, profileRes] = await Promise.all([
       supabase.from('certificates').select('*').eq('user_id', user!.id),
       supabase.from('courses').select('*'),
       supabase.from('lessons').select('id, course_id'),
       supabase.from('user_progress').select('*').eq('user_id', user!.id).eq('completed', true),
+      supabase.from('profiles').select('father_name' as any).eq('user_id', user!.id).maybeSingle(),
     ]);
 
     setCertificates(certsRes.data || []);
+    if (profileRes.data) setFatherName((profileRes.data as any)?.father_name || '');
 
     const courses = coursesRes.data || [];
     const lessons = lessonsRes.data || [];
@@ -45,6 +48,11 @@ const CertificatesPage: React.FC = () => {
     setLoading(false);
   };
 
+  const getFullName = () => {
+    const first = profile?.full_name || '';
+    return fatherName ? `${first} ${fatherName}` : first;
+  };
+
   const generateCertificate = async (course: any) => {
     if (!user || !profile) return;
     setGenerating(course.id);
@@ -58,12 +66,13 @@ const CertificatesPage: React.FC = () => {
       const avgScore = scores.length > 0 ? Math.round(scores.reduce((a: number, b: number) => a + b, 0) / scores.length) : null;
 
       const certNumber = `CERT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+      const fullName = getFullName();
 
       const { error } = await supabase.from('certificates').insert({
         user_id: user.id,
         course_id: course.id,
         certificate_number: certNumber,
-        student_name: profile.full_name,
+        student_name: fullName,
         course_title: language === 'am' ? course.title_am : course.title_en,
         quiz_average: avgScore,
       });
@@ -90,11 +99,11 @@ const CertificatesPage: React.FC = () => {
   };
 
   const getGradeLabel = (score: number | null) => {
-    if (!score) return { label: 'Completed', color: '#6366f1' };
-    if (score >= 90) return { label: 'Distinction', color: '#f59e0b' };
+    if (!score) return { label: 'Completed', color: '#0891b2' };
+    if (score >= 90) return { label: 'Distinction', color: '#d4af37' };
     if (score >= 75) return { label: 'Merit', color: '#10b981' };
     if (score >= 60) return { label: 'Pass', color: '#3b82f6' };
-    return { label: 'Completed', color: '#6366f1' };
+    return { label: 'Completed', color: '#0891b2' };
   };
 
   const downloadCertificate = (cert: any) => {
@@ -104,115 +113,132 @@ const CertificatesPage: React.FC = () => {
     const html = `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>Certificate - ${cert.student_name}</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap');
+  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
   * { margin:0; padding:0; box-sizing:border-box; }
   @page { size:landscape A4; margin:0; }
-  body { width:297mm; height:210mm; font-family:'Inter',sans-serif; background:#0f172a; display:flex; align-items:center; justify-content:center; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  body { width:297mm; height:210mm; font-family:'Inter',sans-serif; background:#fff; display:flex; align-items:center; justify-content:center; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   
-  .cert-outer { width:290mm; height:204mm; background:linear-gradient(135deg,#1e293b 0%,#0f172a 50%,#1e293b 100%); border-radius:8px; padding:4mm; position:relative; overflow:hidden; }
+  .cert-wrap { width:293mm; height:207mm; position:relative; overflow:hidden; }
   
-  /* Decorative corner flourishes */
-  .corner { position:absolute; width:60mm; height:60mm; }
-  .corner svg { width:100%; height:100%; }
-  .corner-tl { top:6mm; left:6mm; }
-  .corner-tr { top:6mm; right:6mm; transform:scaleX(-1); }
-  .corner-bl { bottom:6mm; left:6mm; transform:scaleY(-1); }
-  .corner-br { bottom:6mm; right:6mm; transform:scale(-1,-1); }
+  /* Teal diagonal corners */
+  .corner-shape-left { position:absolute; top:0; left:0; width:0; height:0; border-left:85mm solid #0d7377; border-bottom:210mm solid transparent; z-index:1; }
+  .corner-shape-right { position:absolute; top:0; right:0; width:0; height:0; border-right:85mm solid #0d7377; border-bottom:210mm solid transparent; z-index:1; }
   
-  .cert-inner { width:100%; height:100%; border:1px solid rgba(212,175,55,0.3); border-radius:4px; position:relative; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:15mm 25mm; background:radial-gradient(ellipse at center,rgba(212,175,55,0.03) 0%,transparent 70%); }
+  /* Inner teal overlay (darker) */
+  .corner-inner-left { position:absolute; top:0; left:0; width:0; height:0; border-left:70mm solid #0a5c5f; border-bottom:195mm solid transparent; z-index:2; }
+  .corner-inner-right { position:absolute; top:0; right:0; width:0; height:0; border-right:70mm solid #0a5c5f; border-bottom:195mm solid transparent; z-index:2; }
   
-  /* Gold line accents */
-  .cert-inner::before { content:''; position:absolute; inset:4mm; border:1px solid rgba(212,175,55,0.15); border-radius:2px; }
-  .cert-inner::after { content:''; position:absolute; top:50%; left:15mm; right:15mm; height:1px; background:linear-gradient(90deg,transparent,rgba(212,175,55,0.3),transparent); }
+  /* White content area */
+  .content-area { position:absolute; inset:0; z-index:3; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:18mm 80mm; text-align:center; }
   
-  .org-name { font-family:'Cinzel',serif; font-size:11px; letter-spacing:8px; text-transform:uppercase; color:rgba(212,175,55,0.7); margin-bottom:2mm; }
-  .emoji-logo { font-size:28px; margin-bottom:3mm; filter:drop-shadow(0 0 12px rgba(212,175,55,0.4)); }
+  /* Gold decorative lines */
+  .gold-line-top { position:absolute; top:15mm; left:75mm; right:75mm; height:2px; background:linear-gradient(90deg,transparent,#d4af37,transparent); z-index:4; }
+  .gold-line-bottom { position:absolute; bottom:15mm; left:75mm; right:75mm; height:2px; background:linear-gradient(90deg,transparent,#d4af37,transparent); z-index:4; }
   
-  .title { font-family:'Cinzel',serif; font-weight:700; font-size:38px; background:linear-gradient(135deg,#d4af37 0%,#f5d680 30%,#d4af37 60%,#b8942e 100%); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; letter-spacing:6px; text-transform:uppercase; margin-bottom:2mm; }
-  .subtitle { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:16px; color:rgba(255,255,255,0.5); margin-bottom:8mm; letter-spacing:2px; }
+  /* Decorative border */
+  .inner-border { position:absolute; top:12mm; left:72mm; right:72mm; bottom:12mm; border:1px solid rgba(212,175,55,0.25); z-index:4; }
   
-  .presented { font-family:'Cormorant Garamond',serif; font-size:13px; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:4px; margin-bottom:3mm; }
+  /* Gold seal/badge */
+  .gold-seal { position:absolute; top:20mm; left:78mm; z-index:5; width:28mm; height:28mm; }
+  .seal-circle { width:28mm; height:28mm; border-radius:50%; background:linear-gradient(135deg,#d4af37 0%,#f5d680 40%,#d4af37 60%,#b8942e 100%); display:flex; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(212,175,55,0.4); }
+  .seal-inner { width:22mm; height:22mm; border-radius:50%; border:1.5px solid rgba(255,255,255,0.5); display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .seal-text-top { font-family:'Cinzel',serif; font-size:7px; color:#fff; letter-spacing:2px; text-transform:uppercase; }
+  .seal-text-main { font-family:'Cinzel',serif; font-size:11px; font-weight:700; color:#fff; }
+  .seal-text-bottom { font-family:'Cinzel',serif; font-size:6px; color:rgba(255,255,255,0.8); letter-spacing:1px; }
   
-  .student-name { font-family:'Cinzel',serif; font-weight:600; font-size:32px; color:#f8fafc; margin-bottom:2mm; position:relative; padding-bottom:4mm; }
-  .student-name::after { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:80mm; height:1px; background:linear-gradient(90deg,transparent,#d4af37,transparent); }
+  .cert-header { font-family:'Cinzel',serif; font-size:14px; letter-spacing:8px; text-transform:uppercase; color:#0d7377; margin-bottom:2mm; font-weight:400; }
+  .cert-title { font-family:'Cinzel',serif; font-size:42px; font-weight:700; color:#0a5c5f; letter-spacing:3px; margin-bottom:1mm; }
+  .cert-subtitle { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:16px; color:#0d7377; margin-bottom:8mm; letter-spacing:2px; font-weight:300; }
   
-  .course-label { font-family:'Cormorant Garamond',serif; font-size:13px; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:4px; margin-top:6mm; margin-bottom:2mm; }
-  .course-name { font-family:'Cormorant Garamond',serif; font-weight:600; font-size:22px; color:#e2e8f0; letter-spacing:1px; margin-bottom:5mm; }
+  .presented-to { font-family:'Cormorant Garamond',serif; font-size:13px; color:#666; text-transform:uppercase; letter-spacing:5px; margin-bottom:4mm; }
   
-  .grade-badge { display:inline-block; padding:2mm 8mm; border:1px solid ${grade.color}; border-radius:20px; font-family:'Cinzel',serif; font-size:11px; letter-spacing:3px; text-transform:uppercase; color:${grade.color}; margin-bottom:4mm; }
+  .student-name { font-family:'Cormorant Garamond',serif; font-weight:700; font-size:34px; color:#1a1a1a; padding-bottom:3mm; position:relative; margin-bottom:4mm; }
+  .student-name::after { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:100mm; height:2px; background:linear-gradient(90deg,transparent,#d4af37,transparent); }
   
-  ${cert.quiz_average ? `.score { font-family:'Inter',sans-serif; font-size:11px; color:rgba(255,255,255,0.35); margin-bottom:4mm; }` : ''}
+  .for-text { font-family:'Cormorant Garamond',serif; font-size:13px; color:#666; text-transform:uppercase; letter-spacing:4px; margin-bottom:3mm; }
+  .course-name { font-family:'Cormorant Garamond',serif; font-weight:600; font-size:22px; color:#0d7377; letter-spacing:1px; margin-bottom:5mm; }
   
-  .date { font-family:'Cormorant Garamond',serif; font-size:13px; color:rgba(255,255,255,0.4); margin-bottom:6mm; }
+  .grade-pill { display:inline-block; padding:2mm 10mm; background:linear-gradient(135deg,${grade.color}22,${grade.color}11); border:1px solid ${grade.color}; border-radius:25px; font-family:'Cinzel',serif; font-size:10px; letter-spacing:3px; text-transform:uppercase; color:${grade.color}; margin-bottom:3mm; }
   
-  .footer { position:absolute; bottom:8mm; left:15mm; right:15mm; display:flex; justify-content:space-between; align-items:flex-end; }
-  .footer-left, .footer-right { text-align:center; }
-  .footer-line { width:50mm; height:1px; background:rgba(212,175,55,0.3); margin-bottom:2mm; }
-  .footer-text { font-family:'Inter',sans-serif; font-size:8px; color:rgba(255,255,255,0.3); letter-spacing:1px; text-transform:uppercase; }
+  .score-text { font-family:'Inter',sans-serif; font-size:10px; color:#999; margin-bottom:5mm; }
+  .date-text { font-family:'Cormorant Garamond',serif; font-size:13px; color:#888; font-style:italic; margin-bottom:4mm; }
   
-  .seal { position:absolute; bottom:12mm; left:50%; transform:translateX(-50%); width:22mm; height:22mm; border:2px solid rgba(212,175,55,0.5); border-radius:50%; display:flex; align-items:center; justify-content:center; flex-direction:column; background:radial-gradient(circle,rgba(212,175,55,0.08),transparent); }
-  .seal-text { font-family:'Cinzel',serif; font-size:7px; color:rgba(212,175,55,0.7); letter-spacing:2px; text-transform:uppercase; }
-  .seal-check { font-size:16px; color:#d4af37; margin-bottom:1mm; }
+  .signatures { position:absolute; bottom:22mm; left:80mm; right:80mm; display:flex; justify-content:space-between; z-index:5; }
+  .sig-block { text-align:center; width:45mm; }
+  .sig-line { width:100%; height:1px; background:#ccc; margin-bottom:2mm; }
+  .sig-label { font-family:'Inter',sans-serif; font-size:8px; color:#999; text-transform:uppercase; letter-spacing:1px; }
   
-  .verify { position:absolute; bottom:3mm; left:50%; transform:translateX(-50%); font-family:'Inter',sans-serif; font-size:7px; color:rgba(255,255,255,0.2); letter-spacing:1px; }
+  .cert-number { position:absolute; bottom:10mm; left:80mm; font-family:'Inter',sans-serif; font-size:7px; color:#bbb; letter-spacing:1px; z-index:5; }
+  .verify-text { position:absolute; bottom:10mm; right:80mm; font-family:'Inter',sans-serif; font-size:7px; color:#bbb; z-index:5; text-align:right; }
   
-  .qr-section { position:absolute; bottom:10mm; right:18mm; text-align:center; }
-  .qr-code { width:18mm; height:18mm; border:1px solid rgba(212,175,55,0.2); border-radius:2px; display:flex; align-items:center; justify-content:center; background:rgba(255,255,255,0.05); margin-bottom:1mm; }
-  .qr-code img { width:16mm; height:16mm; }
-  .qr-label { font-family:'Inter',sans-serif; font-size:6px; color:rgba(255,255,255,0.25); letter-spacing:1px; text-transform:uppercase; }
+  .qr-area { position:absolute; bottom:18mm; right:78mm; z-index:5; text-align:center; }
+  .qr-img { width:16mm; height:16mm; border:1px solid #e5e5e5; border-radius:2px; }
+  .qr-label { font-family:'Inter',sans-serif; font-size:5px; color:#ccc; letter-spacing:1px; text-transform:uppercase; margin-top:1mm; }
   
-  /* Animated shimmer for screen */
-  @keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+  .org-logo { position:absolute; top:22mm; right:78mm; z-index:5; text-align:center; }
+  .org-icon { font-size:22px; }
+  .org-name { font-family:'Cinzel',serif; font-size:7px; color:#0d7377; letter-spacing:1px; margin-top:1mm; }
 </style></head><body>
-<div class="cert-outer">
-  <!-- Corner Flourishes -->
-  <div class="corner corner-tl"><svg viewBox="0 0 200 200" fill="none"><path d="M10 190 Q10 10 190 10" stroke="rgba(212,175,55,0.3)" stroke-width="1" fill="none"/><path d="M20 180 Q20 20 180 20" stroke="rgba(212,175,55,0.15)" stroke-width="0.5" fill="none"/><circle cx="15" cy="15" r="3" fill="rgba(212,175,55,0.3)"/><path d="M10 60 Q30 30 60 10" stroke="rgba(212,175,55,0.2)" stroke-width="0.5" fill="none"/><path d="M10 100 Q50 50 100 10" stroke="rgba(212,175,55,0.1)" stroke-width="0.5" fill="none"/></svg></div>
-  <div class="corner corner-tr"><svg viewBox="0 0 200 200" fill="none"><path d="M10 190 Q10 10 190 10" stroke="rgba(212,175,55,0.3)" stroke-width="1" fill="none"/><path d="M20 180 Q20 20 180 20" stroke="rgba(212,175,55,0.15)" stroke-width="0.5" fill="none"/><circle cx="15" cy="15" r="3" fill="rgba(212,175,55,0.3)"/><path d="M10 60 Q30 30 60 10" stroke="rgba(212,175,55,0.2)" stroke-width="0.5" fill="none"/><path d="M10 100 Q50 50 100 10" stroke="rgba(212,175,55,0.1)" stroke-width="0.5" fill="none"/></svg></div>
-  <div class="corner corner-bl"><svg viewBox="0 0 200 200" fill="none"><path d="M10 190 Q10 10 190 10" stroke="rgba(212,175,55,0.3)" stroke-width="1" fill="none"/><path d="M20 180 Q20 20 180 20" stroke="rgba(212,175,55,0.15)" stroke-width="0.5" fill="none"/><circle cx="15" cy="15" r="3" fill="rgba(212,175,55,0.3)"/></svg></div>
-  <div class="corner corner-br"><svg viewBox="0 0 200 200" fill="none"><path d="M10 190 Q10 10 190 10" stroke="rgba(212,175,55,0.3)" stroke-width="1" fill="none"/><path d="M20 180 Q20 20 180 20" stroke="rgba(212,175,55,0.15)" stroke-width="0.5" fill="none"/><circle cx="15" cy="15" r="3" fill="rgba(212,175,55,0.3)"/></svg></div>
+<div class="cert-wrap">
+  <div class="corner-shape-left"></div>
+  <div class="corner-shape-right"></div>
+  <div class="corner-inner-left"></div>
+  <div class="corner-inner-right"></div>
+  <div class="gold-line-top"></div>
+  <div class="gold-line-bottom"></div>
+  <div class="inner-border"></div>
   
-  <div class="cert-inner">
-    <div class="emoji-logo">🧪</div>
+  <!-- Gold Seal -->
+  <div class="gold-seal">
+    <div class="seal-circle">
+      <div class="seal-inner">
+        <div class="seal-text-top">Best</div>
+        <div class="seal-text-main">AWARD</div>
+        <div class="seal-text-bottom">★ ★ ★</div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Organization Logo -->
+  <div class="org-logo">
+    <div class="org-icon">🧪</div>
     <div class="org-name">Safety First Chemistry</div>
-    <div class="title">Certificate</div>
-    <div class="subtitle">of Achievement</div>
+  </div>
+  
+  <div class="content-area">
+    <div class="cert-header">Certificate</div>
+    <div class="cert-title">Certificate</div>
+    <div class="cert-subtitle">of Achievement</div>
     
-    <div class="presented">This is proudly presented to</div>
+    <div class="presented-to">This certificate is presented to</div>
     <div class="student-name">${cert.student_name}</div>
     
-    <div class="course-label">For successfully completing</div>
+    <div class="for-text">For successfully completing the course</div>
     <div class="course-name">${cert.course_title}</div>
     
-    <div class="grade-badge">${grade.label}</div>
-    ${cert.quiz_average ? `<div class="score">Average Assessment Score: ${cert.quiz_average}%</div>` : ''}
-    
-    <div class="date">${new Date(cert.completion_date).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })}</div>
-    
-    <div class="seal">
-      <div class="seal-check">✦</div>
-      <div class="seal-text">Verified</div>
-    </div>
-    
-    <div class="footer">
-      <div class="footer-left">
-        <div class="footer-line"></div>
-        <div class="footer-text">Certificate No: ${cert.certificate_number}</div>
-      </div>
-      <div class="footer-right">
-        <div class="footer-line"></div>
-        <div class="footer-text">Date Issued: ${new Date(cert.issued_at).toLocaleDateString()}</div>
-      </div>
-    </div>
-    
-    <div class="qr-section">
-      <div class="qr-code">
-        <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyUrl)}&bgcolor=1e293b&color=d4af37&format=svg" alt="QR" />
-      </div>
-      <div class="qr-label">Scan to verify</div>
-    </div>
-    
-    <div class="verify">Verify at: ${verifyUrl}</div>
+    <div class="grade-pill">${grade.label}</div>
+    ${cert.quiz_average ? `<div class="score-text">Assessment Score: ${cert.quiz_average}%</div>` : ''}
+    <div class="date-text">${new Date(cert.completion_date).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })}</div>
   </div>
+  
+  <div class="signatures">
+    <div class="sig-block">
+      <div class="sig-line"></div>
+      <div class="sig-label">Date</div>
+    </div>
+    <div class="sig-block">
+      <div class="sig-line"></div>
+      <div class="sig-label">Signature</div>
+    </div>
+  </div>
+  
+  <div class="qr-area">
+    <img class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyUrl)}&format=svg" alt="QR" />
+    <div class="qr-label">Scan to verify</div>
+  </div>
+  
+  <div class="cert-number">Certificate #${cert.certificate_number}</div>
+  <div class="verify-text">Verify: ${verifyUrl}</div>
 </div>
 </body></html>`;
 
@@ -263,7 +289,6 @@ const CertificatesPage: React.FC = () => {
           {language === 'am' ? 'የምስክር ወረቀቶች' : 'My Certificates'}
         </h1>
 
-        {/* Eligible courses */}
         {eligibleCourses.length > 0 && (
           <div className="mb-8">
             <h2 className="text-lg font-semibold mb-3 flex items-center gap-2">
@@ -301,7 +326,6 @@ const CertificatesPage: React.FC = () => {
           </div>
         )}
 
-        {/* Existing certificates */}
         {certificates.length === 0 && eligibleCourses.length === 0 ? (
           <Card className="text-center py-16">
             <CardContent>
@@ -322,7 +346,7 @@ const CertificatesPage: React.FC = () => {
                 <Card key={cert.id} className="overflow-hidden">
                   <CardContent className="p-0">
                     <div className="flex items-stretch">
-                      <div className="w-2 bg-gradient-to-b from-amber-500 to-amber-700 flex-shrink-0" />
+                      <div className="w-2 bg-gradient-to-b from-teal-600 to-teal-800 flex-shrink-0" />
                       <div className="flex-1 p-4">
                         <div className="flex items-start justify-between">
                           <div>
@@ -334,7 +358,7 @@ const CertificatesPage: React.FC = () => {
                               {language === 'am' ? 'ለ' : 'Awarded to'} {cert.student_name}
                             </p>
                             <div className="flex flex-wrap gap-2 mt-2">
-                              <Badge variant="secondary" className="text-xs">#{cert.certificate_number}</Badge>
+                              <Badge variant="secondary" className="text-xs font-mono">#{cert.certificate_number}</Badge>
                               <Badge style={{ borderColor: grade.color, color: grade.color }} variant="outline" className="text-xs">{grade.label}</Badge>
                               {cert.quiz_average && <Badge variant="outline" className="text-xs">Score: {cert.quiz_average}%</Badge>}
                               <span className="text-xs text-muted-foreground">
@@ -354,7 +378,7 @@ const CertificatesPage: React.FC = () => {
                           </Button>
                           <Button variant="ghost" size="sm" onClick={() => copyVerifyLink(cert.certificate_number)}>
                             {copiedId === cert.certificate_number ? (
-                              <CheckCircle2 className="h-4 w-4 text-green-500" />
+                              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
                             ) : (
                               <Copy className="h-4 w-4" />
                             )}
