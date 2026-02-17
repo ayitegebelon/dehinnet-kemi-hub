@@ -24,6 +24,7 @@ import DiscussionPage from "./pages/DiscussionPage";
 import LeaderboardPage from "./pages/LeaderboardPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import CertificatesPage from "./pages/CertificatesPage";
+import VerifyCertificatePage from "./pages/VerifyCertificatePage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -56,6 +57,8 @@ const AppRoutes = () => {
       <Route path="/" element={<Index />} />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup />} />
+      <Route path="/verify/:certNumber" element={<VerifyCertificatePage />} />
+      <Route path="/verify" element={<VerifyCertificatePage />} />
       <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
       <Route path="/recipes" element={<ProtectedRoute><Recipes /></ProtectedRoute>} />
       <Route path="/periodic-table" element={<ProtectedRoute><PeriodicTablePage /></ProtectedRoute>} />
