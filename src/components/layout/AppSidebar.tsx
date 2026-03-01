@@ -19,6 +19,9 @@ import {
   Trophy,
   Bell,
   Award,
+  BarChart3,
+  Bot,
+  BookOpen,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -50,6 +53,9 @@ const AppSidebar: React.FC = () => {
     { path: '/projects', label: language === 'am' ? 'ፕሮጀክቶች' : 'Projects', icon: FolderKanban },
     { path: '/learn', label: language === 'am' ? 'ትምህርት' : 'Learn', icon: GraduationCap },
     { path: '/flashcards', label: language === 'am' ? 'ፍላሽ ካርድ' : 'Flashcards', icon: Brain },
+    { path: '/ai-assistant', label: language === 'am' ? 'AI ረዳት' : 'AI Assistant', icon: Bot },
+    { path: '/lab-notebook', label: language === 'am' ? 'ላብ ማስታወሻ' : 'Lab Notebook', icon: BookOpen },
+    { path: '/analytics', label: language === 'am' ? 'ትንተና' : 'Analytics', icon: BarChart3 },
     { path: '/leaderboard', label: language === 'am' ? 'ደረጃ ሰንጠረዥ' : 'Leaderboard', icon: Trophy },
     { path: '/discussion', label: language === 'am' ? 'ውይይት' : 'Discussion', icon: MessagesSquare },
     { path: '/notifications', label: language === 'am' ? 'ማሳወቂያዎች' : 'Notifications', icon: Bell },
@@ -80,7 +86,6 @@ const AppSidebar: React.FC = () => {
       </div>
 
       <SidebarContent className="scrollbar-thin">
-        {/* Main Navigation */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground">
             {!collapsed && (language === 'am' ? 'ዋና' : 'Main')}
@@ -105,7 +110,6 @@ const AppSidebar: React.FC = () => {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Account */}
         <SidebarGroup>
           <SidebarGroupLabel className="text-[10px] uppercase tracking-widest text-muted-foreground">
             {!collapsed && (language === 'am' ? 'መለያ' : 'Account')}
@@ -145,7 +149,6 @@ const AppSidebar: React.FC = () => {
         </SidebarGroup>
       </SidebarContent>
 
-      {/* Footer - User info */}
       <SidebarFooter className="border-t border-sidebar-border p-3">
         {!collapsed ? (
           <div className="flex items-center gap-3">

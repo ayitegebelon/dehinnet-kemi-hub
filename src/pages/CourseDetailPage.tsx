@@ -88,6 +88,23 @@ const CourseDetailPage: React.FC = () => {
     }, { onConflict: 'user_id,lesson_id' });
 
     if (!error) {
+      // Save quiz attempt with integrity data
+      if (quizzes.length > 0) {
+        const report = getReport();
+        await (supabase.from('quiz_attempts' as any) as any).insert({
+          user_id: user.id,
+          lesson_id: activeLesson.id,
+          course_id: courseId,
+          quiz_score: score,
+          integrity_score: integrityScore,
+          tab_switch_count: report.tabSwitchCount,
+          copy_paste_count: report.copyPasteCount,
+          focus_lost_count: report.focusLostCount,
+          rapid_answer_count: report.rapidAnswerCount,
+          flagged: report.flagged,
+          warnings: warnings,
+        });
+      }
       toast.success(language === 'am' ? 'ትምህርት ተጠናቋል!' : `Lesson completed! Score: ${score}%`);
       setProgress(prev => ({ ...prev, [activeLesson.id]: { completed: true, quiz_score: score } }));
       setQuizSubmitted(true);
