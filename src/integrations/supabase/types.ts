@@ -336,6 +336,51 @@ export type Database = {
           },
         ]
       }
+      lab_notebook: {
+        Row: {
+          conclusion: string | null
+          created_at: string
+          experiment_date: string
+          hypothesis: string | null
+          id: string
+          materials: string | null
+          observations: string | null
+          procedure: string | null
+          safety_notes: string | null
+          status: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          conclusion?: string | null
+          created_at?: string
+          experiment_date?: string
+          hypothesis?: string | null
+          id?: string
+          materials?: string | null
+          observations?: string | null
+          procedure?: string | null
+          safety_notes?: string | null
+          status?: string
+          title: string
+          user_id: string
+        }
+        Update: {
+          conclusion?: string | null
+          created_at?: string
+          experiment_date?: string
+          hypothesis?: string | null
+          id?: string
+          materials?: string | null
+          observations?: string | null
+          procedure?: string | null
+          safety_notes?: string | null
+          status?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       lessons: {
         Row: {
           content_am: string | null
@@ -481,6 +526,72 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      quiz_attempts: {
+        Row: {
+          completed_at: string
+          copy_paste_count: number
+          course_id: string
+          flagged: boolean
+          focus_lost_count: number
+          id: string
+          integrity_score: number
+          lesson_id: string
+          quiz_score: number
+          rapid_answer_count: number
+          student_name: string | null
+          tab_switch_count: number
+          user_id: string
+          warnings: string[] | null
+        }
+        Insert: {
+          completed_at?: string
+          copy_paste_count?: number
+          course_id: string
+          flagged?: boolean
+          focus_lost_count?: number
+          id?: string
+          integrity_score?: number
+          lesson_id: string
+          quiz_score?: number
+          rapid_answer_count?: number
+          student_name?: string | null
+          tab_switch_count?: number
+          user_id: string
+          warnings?: string[] | null
+        }
+        Update: {
+          completed_at?: string
+          copy_paste_count?: number
+          course_id?: string
+          flagged?: boolean
+          focus_lost_count?: number
+          id?: string
+          integrity_score?: number
+          lesson_id?: string
+          quiz_score?: number
+          rapid_answer_count?: number
+          student_name?: string | null
+          tab_switch_count?: number
+          user_id?: string
+          warnings?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_attempts_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "quiz_attempts_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       quizzes: {
         Row: {

@@ -25,6 +25,9 @@ import LeaderboardPage from "./pages/LeaderboardPage";
 import NotificationsPage from "./pages/NotificationsPage";
 import CertificatesPage from "./pages/CertificatesPage";
 import VerifyCertificatePage from "./pages/VerifyCertificatePage";
+import StudyAnalyticsPage from "./pages/StudyAnalyticsPage";
+import AIAssistantPage from "./pages/AIAssistantPage";
+import LabNotebookPage from "./pages/LabNotebookPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -72,6 +75,9 @@ const AppRoutes = () => {
       <Route path="/leaderboard" element={<ProtectedRoute><LeaderboardPage /></ProtectedRoute>} />
       <Route path="/notifications" element={<ProtectedRoute><NotificationsPage /></ProtectedRoute>} />
       <Route path="/certificates" element={<ProtectedRoute><CertificatesPage /></ProtectedRoute>} />
+      <Route path="/analytics" element={<ProtectedRoute><StudyAnalyticsPage /></ProtectedRoute>} />
+      <Route path="/ai-assistant" element={<ProtectedRoute><AIAssistantPage /></ProtectedRoute>} />
+      <Route path="/lab-notebook" element={<ProtectedRoute><LabNotebookPage /></ProtectedRoute>} />
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
