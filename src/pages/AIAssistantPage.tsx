@@ -2,13 +2,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import Layout from '@/components/layout/Layout';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Bot, Send, User, Sparkles, Atom, FlaskConical, Shield, Loader2 } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import ReactMarkdown from 'react-markdown';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -21,8 +21,6 @@ const SUGGESTED_PROMPTS_EN = [
   "Explain the safety precautions for handling acids",
   "What is the difference between ionic and covalent bonds?",
   "How do I balance a chemical equation?",
-  "Explain oxidation and reduction reactions",
-  "What safety equipment is needed in a chemistry lab?",
 ];
 
 const SUGGESTED_PROMPTS_AM = [
@@ -30,8 +28,6 @@ const SUGGESTED_PROMPTS_AM = [
   "አሲዶችን ሲይዙ ምን ጥንቃቄዎች ያስፈልጋሉ?",
   "በአዮኒክ እና ኮቫለንት ቦንዶች መካከል ያለው ልዩነት ምንድነው?",
   "የኬሚካል ቀመር እንዴት ማመጣጠን ይቻላል?",
-  "ኦክሲዴሽን እና ሪዳክሽን ምላሾችን ያብራሩ",
-  "በኬሚስትሪ ላብ ውስጥ ምን የደህንነት መሳሪያዎች ያስፈልጋሉ?",
 ];
 
 const AIAssistantPage: React.FC = () => {
@@ -61,7 +57,7 @@ const AIAssistantPage: React.FC = () => {
 You help students learn chemistry concepts, understand safety protocols, and solve chemistry problems.
 Always prioritize safety in your responses. When discussing experiments, always mention required safety equipment.
 Respond in ${isAm ? 'Amharic' : 'English'}. Be concise but thorough. Use examples relevant to Ethiopian context when possible.
-Format your responses with clear structure using bullet points and headers when appropriate.`;
+IMPORTANT: Do NOT use markdown formatting like ** for bold, ## for headers, or * for bullets. Write in plain text with clear paragraphs. Use numbered lists (1. 2. 3.) and simple dashes (-) for lists. Keep responses clean and readable without any special formatting characters.`;
 
       const { data, error } = await supabase.functions.invoke('ai-chemistry-assistant', {
         body: {
@@ -75,9 +71,13 @@ Format your responses with clear structure using bullet points and headers when 
 
       if (error) throw error;
 
+      let reply = data?.reply || (isAm ? 'ይቅርታ፣ መልስ ማግኘት አልተቻለም።' : 'Sorry, I could not generate a response.');
+      // Strip any remaining markdown bold/italic markers
+      reply = reply.replace(/\*\*/g, '').replace(/\*/g, '').replace(/#{1,6}\s/g, '');
+
       const assistantMsg: Message = {
         role: 'assistant',
-        content: data?.reply || (isAm ? 'ይቅርታ፣ መልስ ማግኘት አልተቻለም።' : 'Sorry, I could not generate a response.'),
+        content: reply,
         timestamp: new Date(),
       };
       setMessages(prev => [...prev, assistantMsg]);
@@ -85,7 +85,7 @@ Format your responses with clear structure using bullet points and headers when 
       console.error('AI error:', err);
       setMessages(prev => [...prev, {
         role: 'assistant',
-        content: isAm ? '⚠️ ስህተት ተከስቷል። እባክዎ እንደገና ይሞክሩ።' : '⚠️ An error occurred. Please try again.',
+        content: isAm ? 'ስህተት ተከስቷል። እባክዎ እንደገና ይሞክሩ።' : 'An error occurred. Please try again.',
         timestamp: new Date(),
       }]);
     } finally {
@@ -109,7 +109,6 @@ Format your responses with clear structure using bullet points and headers when 
         </div>
 
         <Card className="h-[calc(100vh-280px)] flex flex-col">
-          {/* Messages */}
           <ScrollArea className="flex-1 p-4" ref={scrollRef}>
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full py-12 space-y-6">
@@ -123,7 +122,7 @@ Format your responses with clear structure using bullet points and headers when 
                   </p>
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-lg">
-                  {suggestedPrompts.slice(0, 4).map((prompt, i) => (
+                  {suggestedPrompts.map((prompt, i) => (
                     <button
                       key={i}
                       onClick={() => sendMessage(prompt)}
@@ -179,7 +178,6 @@ Format your responses with clear structure using bullet points and headers when 
             )}
           </ScrollArea>
 
-          {/* Input */}
           <div className="border-t p-4">
             <div className="flex gap-2">
               <Textarea
