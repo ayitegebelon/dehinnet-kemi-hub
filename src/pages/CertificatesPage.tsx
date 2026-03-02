@@ -110,6 +110,11 @@ const CertificatesPage: React.FC = () => {
     const grade = getGradeLabel(cert.quiz_average);
     const verifyUrl = `${window.location.origin}/verify/${cert.certificate_number}`;
     
+    // Split student name into first name and father name
+    const nameParts = cert.student_name.split(' ');
+    const firstName = nameParts[0] || '';
+    const fatherNamePart = nameParts.slice(1).join(' ') || '';
+    
     const html = `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>Certificate - ${cert.student_name}</title>
 <style>
@@ -118,117 +123,152 @@ const CertificatesPage: React.FC = () => {
   @page { size:landscape A4; margin:0; }
   body { width:297mm; height:210mm; font-family:'Inter',sans-serif; background:#fff; display:flex; align-items:center; justify-content:center; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
   
-  .cert-wrap { width:293mm; height:207mm; position:relative; overflow:hidden; }
+  .cert-wrap { width:293mm; height:207mm; position:relative; overflow:hidden; background:linear-gradient(135deg, #faf9f6 0%, #fff 30%, #faf9f6 100%); }
   
-  /* Teal diagonal corners */
-  .corner-shape-left { position:absolute; top:0; left:0; width:0; height:0; border-left:85mm solid #0d7377; border-bottom:210mm solid transparent; z-index:1; }
-  .corner-shape-right { position:absolute; top:0; right:0; width:0; height:0; border-right:85mm solid #0d7377; border-bottom:210mm solid transparent; z-index:1; }
+  /* Elegant border frame */
+  .outer-border { position:absolute; inset:6mm; border:2px solid #0d7377; }
+  .inner-border { position:absolute; inset:9mm; border:1px solid rgba(212,175,55,0.4); }
+  .decorative-border { position:absolute; inset:11mm; border:1px solid rgba(13,115,119,0.15); }
   
-  /* Inner teal overlay (darker) */
-  .corner-inner-left { position:absolute; top:0; left:0; width:0; height:0; border-left:70mm solid #0a5c5f; border-bottom:195mm solid transparent; z-index:2; }
-  .corner-inner-right { position:absolute; top:0; right:0; width:0; height:0; border-right:70mm solid #0a5c5f; border-bottom:195mm solid transparent; z-index:2; }
+  /* Corner ornaments */
+  .corner { position:absolute; width:25mm; height:25mm; z-index:5; }
+  .corner-tl { top:7mm; left:7mm; border-top:3px solid #d4af37; border-left:3px solid #d4af37; }
+  .corner-tr { top:7mm; right:7mm; border-top:3px solid #d4af37; border-right:3px solid #d4af37; }
+  .corner-bl { bottom:7mm; left:7mm; border-bottom:3px solid #d4af37; border-left:3px solid #d4af37; }
+  .corner-br { bottom:7mm; right:7mm; border-bottom:3px solid #d4af37; border-right:3px solid #d4af37; }
   
-  /* White content area */
-  .content-area { position:absolute; inset:0; z-index:3; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:18mm 80mm; text-align:center; }
+  /* Side accent bars */
+  .accent-left { position:absolute; top:35mm; left:6mm; width:4mm; height:50mm; background:linear-gradient(180deg, #0d7377, #0a5c5f, #0d7377); z-index:3; }
+  .accent-right { position:absolute; top:35mm; right:6mm; width:4mm; height:50mm; background:linear-gradient(180deg, #0d7377, #0a5c5f, #0d7377); z-index:3; }
   
-  /* Gold decorative lines */
-  .gold-line-top { position:absolute; top:15mm; left:75mm; right:75mm; height:2px; background:linear-gradient(90deg,transparent,#d4af37,transparent); z-index:4; }
-  .gold-line-bottom { position:absolute; bottom:15mm; left:75mm; right:75mm; height:2px; background:linear-gradient(90deg,transparent,#d4af37,transparent); z-index:4; }
+  /* Content */
+  .content { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20mm 50mm; text-align:center; z-index:4; }
   
-  /* Decorative border */
-  .inner-border { position:absolute; top:12mm; left:72mm; right:72mm; bottom:12mm; border:1px solid rgba(212,175,55,0.25); z-index:4; }
+  /* Organization header */
+  .org-header { display:flex; align-items:center; gap:4mm; margin-bottom:6mm; }
+  .org-icon { font-size:28px; }
+  .org-info { text-align:left; }
+  .org-name { font-family:'Cinzel',serif; font-size:14px; font-weight:700; color:#0d7377; letter-spacing:2px; }
+  .org-tagline { font-family:'Inter',sans-serif; font-size:8px; color:#888; letter-spacing:3px; text-transform:uppercase; }
   
-  /* Gold seal/badge */
-  .gold-seal { position:absolute; top:20mm; left:78mm; z-index:5; width:28mm; height:28mm; }
-  .seal-circle { width:28mm; height:28mm; border-radius:50%; background:linear-gradient(135deg,#d4af37 0%,#f5d680 40%,#d4af37 60%,#b8942e 100%); display:flex; align-items:center; justify-content:center; box-shadow:0 4px 15px rgba(212,175,55,0.4); }
-  .seal-inner { width:22mm; height:22mm; border-radius:50%; border:1.5px solid rgba(255,255,255,0.5); display:flex; flex-direction:column; align-items:center; justify-content:center; }
-  .seal-text-top { font-family:'Cinzel',serif; font-size:7px; color:#fff; letter-spacing:2px; text-transform:uppercase; }
-  .seal-text-main { font-family:'Cinzel',serif; font-size:11px; font-weight:700; color:#fff; }
-  .seal-text-bottom { font-family:'Cinzel',serif; font-size:6px; color:rgba(255,255,255,0.8); letter-spacing:1px; }
+  /* Divider */
+  .gold-divider { width:120mm; height:1px; background:linear-gradient(90deg, transparent, #d4af37, transparent); margin:4mm 0; }
+  .gold-divider-thick { width:80mm; height:2px; background:linear-gradient(90deg, transparent, #d4af37, #d4af37, transparent); margin:3mm 0; }
   
-  .cert-header { font-family:'Cinzel',serif; font-size:14px; letter-spacing:8px; text-transform:uppercase; color:#0d7377; margin-bottom:2mm; font-weight:400; }
-  .cert-title { font-family:'Cinzel',serif; font-size:42px; font-weight:700; color:#0a5c5f; letter-spacing:3px; margin-bottom:1mm; }
-  .cert-subtitle { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:16px; color:#0d7377; margin-bottom:8mm; letter-spacing:2px; font-weight:300; }
+  .cert-label { font-family:'Cinzel',serif; font-size:11px; letter-spacing:10px; text-transform:uppercase; color:#999; margin-bottom:2mm; }
+  .cert-title { font-family:'Cinzel',serif; font-size:38px; font-weight:700; color:#0a5c5f; letter-spacing:4px; margin-bottom:1mm; }
+  .cert-subtitle { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:16px; color:#0d7377; letter-spacing:3px; font-weight:300; margin-bottom:5mm; }
   
-  .presented-to { font-family:'Cormorant Garamond',serif; font-size:13px; color:#666; text-transform:uppercase; letter-spacing:5px; margin-bottom:4mm; }
+  .presented-to { font-family:'Cormorant Garamond',serif; font-size:12px; color:#888; text-transform:uppercase; letter-spacing:6px; margin-bottom:3mm; }
   
-  .student-name { font-family:'Cormorant Garamond',serif; font-weight:700; font-size:34px; color:#1a1a1a; padding-bottom:3mm; position:relative; margin-bottom:4mm; }
-  .student-name::after { content:''; position:absolute; bottom:0; left:50%; transform:translateX(-50%); width:100mm; height:2px; background:linear-gradient(90deg,transparent,#d4af37,transparent); }
+  .name-section { margin-bottom:5mm; }
+  .student-first-name { font-family:'Cormorant Garamond',serif; font-weight:700; font-size:36px; color:#1a1a1a; line-height:1.2; }
+  .student-father-name { font-family:'Cormorant Garamond',serif; font-weight:400; font-size:28px; color:#444; line-height:1.2; margin-top:1mm; }
+  .name-underline { width:100mm; height:2px; background:linear-gradient(90deg, transparent, #d4af37, transparent); margin:3mm auto 0; }
   
-  .for-text { font-family:'Cormorant Garamond',serif; font-size:13px; color:#666; text-transform:uppercase; letter-spacing:4px; margin-bottom:3mm; }
-  .course-name { font-family:'Cormorant Garamond',serif; font-weight:600; font-size:22px; color:#0d7377; letter-spacing:1px; margin-bottom:5mm; }
+  .for-text { font-family:'Cormorant Garamond',serif; font-size:12px; color:#888; text-transform:uppercase; letter-spacing:5px; margin-bottom:2mm; }
+  .course-name { font-family:'Cormorant Garamond',serif; font-weight:600; font-size:20px; color:#0d7377; letter-spacing:1px; margin-bottom:4mm; }
   
-  .grade-pill { display:inline-block; padding:2mm 10mm; background:linear-gradient(135deg,${grade.color}22,${grade.color}11); border:1px solid ${grade.color}; border-radius:25px; font-family:'Cinzel',serif; font-size:10px; letter-spacing:3px; text-transform:uppercase; color:${grade.color}; margin-bottom:3mm; }
+  .grade-section { display:flex; align-items:center; gap:4mm; margin-bottom:4mm; }
+  .grade-pill { padding:2mm 8mm; background:linear-gradient(135deg,${grade.color}15,${grade.color}08); border:1.5px solid ${grade.color}; border-radius:20px; font-family:'Cinzel',serif; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:${grade.color}; }
+  .score-pill { padding:2mm 6mm; background:rgba(13,115,119,0.06); border:1px solid rgba(13,115,119,0.2); border-radius:20px; font-family:'Inter',sans-serif; font-size:9px; color:#0d7377; }
   
-  .score-text { font-family:'Inter',sans-serif; font-size:10px; color:#999; margin-bottom:5mm; }
-  .date-text { font-family:'Cormorant Garamond',serif; font-size:13px; color:#888; font-style:italic; margin-bottom:4mm; }
+  .date-text { font-family:'Cormorant Garamond',serif; font-size:12px; color:#999; font-style:italic; margin-bottom:3mm; }
   
-  .signatures { position:absolute; bottom:22mm; left:80mm; right:80mm; display:flex; justify-content:space-between; z-index:5; }
-  .sig-block { text-align:center; width:45mm; }
-  .sig-line { width:100%; height:1px; background:#ccc; margin-bottom:2mm; }
-  .sig-label { font-family:'Inter',sans-serif; font-size:8px; color:#999; text-transform:uppercase; letter-spacing:1px; }
+  /* Signatures */
+  .signatures { position:absolute; bottom:25mm; left:55mm; right:55mm; display:flex; justify-content:space-between; z-index:5; }
+  .sig-block { text-align:center; width:50mm; }
+  .sig-line { width:100%; height:1px; background:linear-gradient(90deg, transparent, #ccc, transparent); margin-bottom:2mm; }
+  .sig-title { font-family:'Cinzel',serif; font-size:7px; color:#aaa; text-transform:uppercase; letter-spacing:2px; }
+  .sig-name { font-family:'Cormorant Garamond',serif; font-size:10px; color:#666; font-style:italic; margin-bottom:1mm; }
   
-  .cert-number { position:absolute; bottom:10mm; left:80mm; font-family:'Inter',sans-serif; font-size:7px; color:#bbb; letter-spacing:1px; z-index:5; }
-  .verify-text { position:absolute; bottom:10mm; right:80mm; font-family:'Inter',sans-serif; font-size:7px; color:#bbb; z-index:5; text-align:right; }
+  /* Gold seal */
+  .seal { position:absolute; bottom:30mm; left:50%; transform:translateX(-50%); z-index:6; }
+  .seal-outer { width:30mm; height:30mm; border-radius:50%; background:linear-gradient(135deg,#d4af37 0%,#f5d680 35%,#d4af37 65%,#b8942e 100%); display:flex; align-items:center; justify-content:center; box-shadow:0 4px 20px rgba(212,175,55,0.35); }
+  .seal-middle { width:26mm; height:26mm; border-radius:50%; border:1px solid rgba(255,255,255,0.4); display:flex; align-items:center; justify-content:center; }
+  .seal-inner { width:22mm; height:22mm; border-radius:50%; border:1px solid rgba(255,255,255,0.3); display:flex; flex-direction:column; align-items:center; justify-content:center; }
+  .seal-icon { font-size:14px; margin-bottom:1mm; }
+  .seal-text { font-family:'Cinzel',serif; font-size:6px; color:#fff; letter-spacing:2px; text-transform:uppercase; }
+  .seal-year { font-family:'Cinzel',serif; font-size:8px; color:#fff; font-weight:700; }
   
-  .qr-area { position:absolute; bottom:18mm; right:78mm; z-index:5; text-align:center; }
-  .qr-img { width:16mm; height:16mm; border:1px solid #e5e5e5; border-radius:2px; }
+  /* QR */
+  .qr-area { position:absolute; bottom:20mm; right:20mm; z-index:5; text-align:center; }
+  .qr-img { width:14mm; height:14mm; border:1px solid #e5e5e5; border-radius:2mm; }
   .qr-label { font-family:'Inter',sans-serif; font-size:5px; color:#ccc; letter-spacing:1px; text-transform:uppercase; margin-top:1mm; }
   
-  .org-logo { position:absolute; top:22mm; right:78mm; z-index:5; text-align:center; }
-  .org-icon { font-size:22px; }
-  .org-name { font-family:'Cinzel',serif; font-size:7px; color:#0d7377; letter-spacing:1px; margin-top:1mm; }
+  /* Watermark */
+  .watermark { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-30deg); font-family:'Cinzel',serif; font-size:80px; color:rgba(13,115,119,0.03); letter-spacing:15px; text-transform:uppercase; z-index:1; white-space:nowrap; pointer-events:none; }
 </style></head><body>
 <div class="cert-wrap">
-  <div class="corner-shape-left"></div>
-  <div class="corner-shape-right"></div>
-  <div class="corner-inner-left"></div>
-  <div class="corner-inner-right"></div>
-  <div class="gold-line-top"></div>
-  <div class="gold-line-bottom"></div>
+  <div class="watermark">ደህንነት ኬሚ</div>
+  <div class="outer-border"></div>
   <div class="inner-border"></div>
+  <div class="decorative-border"></div>
+  <div class="corner corner-tl"></div>
+  <div class="corner corner-tr"></div>
+  <div class="corner corner-bl"></div>
+  <div class="corner corner-br"></div>
+  <div class="accent-left"></div>
+  <div class="accent-right"></div>
   
-  <!-- Gold Seal -->
-  <div class="gold-seal">
-    <div class="seal-circle">
-      <div class="seal-inner">
-        <div class="seal-text-top">Best</div>
-        <div class="seal-text-main">AWARD</div>
-        <div class="seal-text-bottom">★ ★ ★</div>
+  <div class="content">
+    <div class="org-header">
+      <div class="org-icon">🧪</div>
+      <div class="org-info">
+        <div class="org-name">ደህንነት ኬሚ</div>
+        <div class="org-tagline">Safety First Chemistry Academy</div>
+      </div>
+    </div>
+    
+    <div class="gold-divider"></div>
+    
+    <div class="cert-label">Certificate</div>
+    <div class="cert-title">CERTIFICATE</div>
+    <div class="cert-subtitle">of Achievement & Excellence</div>
+    
+    <div class="gold-divider-thick"></div>
+    
+    <div class="presented-to">This is to certify that</div>
+    
+    <div class="name-section">
+      <div class="student-first-name">${firstName}</div>
+      ${fatherNamePart ? `<div class="student-father-name">${fatherNamePart}</div>` : ''}
+      <div class="name-underline"></div>
+    </div>
+    
+    <div class="for-text">Has successfully completed the course</div>
+    <div class="course-name">${cert.course_title}</div>
+    
+    <div class="grade-section">
+      <div class="grade-pill">${grade.label}</div>
+      ${cert.quiz_average ? `<div class="score-pill">Score: ${cert.quiz_average}%</div>` : ''}
+    </div>
+    
+    <div class="date-text">Awarded on ${new Date(cert.completion_date).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })}</div>
+  </div>
+  
+  <div class="seal">
+    <div class="seal-outer">
+      <div class="seal-middle">
+        <div class="seal-inner">
+          <div class="seal-icon">🏆</div>
+          <div class="seal-text">Certified</div>
+          <div class="seal-year">${new Date().getFullYear()}</div>
+        </div>
       </div>
     </div>
   </div>
   
-  <!-- Organization Logo -->
-  <div class="org-logo">
-    <div class="org-icon">🧪</div>
-    <div class="org-name">Safety First Chemistry</div>
-  </div>
-  
-  <div class="content-area">
-    <div class="cert-header">Certificate</div>
-    <div class="cert-title">Certificate</div>
-    <div class="cert-subtitle">of Achievement</div>
-    
-    <div class="presented-to">This certificate is presented to</div>
-    <div class="student-name">${cert.student_name}</div>
-    
-    <div class="for-text">For successfully completing the course</div>
-    <div class="course-name">${cert.course_title}</div>
-    
-    <div class="grade-pill">${grade.label}</div>
-    ${cert.quiz_average ? `<div class="score-text">Assessment Score: ${cert.quiz_average}%</div>` : ''}
-    <div class="date-text">${new Date(cert.completion_date).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })}</div>
-  </div>
-  
   <div class="signatures">
     <div class="sig-block">
+      <div class="sig-name">Ayitegeb Tilahun</div>
       <div class="sig-line"></div>
-      <div class="sig-label">Date</div>
+      <div class="sig-title">Founder & Director</div>
     </div>
     <div class="sig-block">
+      <div class="sig-name">${new Date(cert.completion_date).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })}</div>
       <div class="sig-line"></div>
-      <div class="sig-label">Signature</div>
+      <div class="sig-title">Date of Issue</div>
     </div>
   </div>
   
@@ -236,9 +276,6 @@ const CertificatesPage: React.FC = () => {
     <img class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyUrl)}&format=svg" alt="QR" />
     <div class="qr-label">Scan to verify</div>
   </div>
-  
-  <div class="cert-number">Certificate #${cert.certificate_number}</div>
-  <div class="verify-text">Verify: ${verifyUrl}</div>
 </div>
 </body></html>`;
 
@@ -342,6 +379,7 @@ const CertificatesPage: React.FC = () => {
           <div className="grid gap-4">
             {certificates.map(cert => {
               const grade = getGradeLabel(cert.quiz_average);
+              const nameParts = cert.student_name.split(' ');
               return (
                 <Card key={cert.id} className="overflow-hidden">
                   <CardContent className="p-0">
@@ -355,10 +393,10 @@ const CertificatesPage: React.FC = () => {
                               <p className="font-semibold">{cert.course_title}</p>
                             </div>
                             <p className="text-sm text-muted-foreground">
-                              {language === 'am' ? 'ለ' : 'Awarded to'} {cert.student_name}
+                              {language === 'am' ? 'ለ' : 'Awarded to'} <span className="font-medium text-foreground">{nameParts[0]}</span>
+                              {nameParts.length > 1 && <span className="text-foreground"> {nameParts.slice(1).join(' ')}</span>}
                             </p>
                             <div className="flex flex-wrap gap-2 mt-2">
-                              <Badge variant="secondary" className="text-xs font-mono">#{cert.certificate_number}</Badge>
                               <Badge style={{ borderColor: grade.color, color: grade.color }} variant="outline" className="text-xs">{grade.label}</Badge>
                               {cert.quiz_average && <Badge variant="outline" className="text-xs">Score: {cert.quiz_average}%</Badge>}
                               <span className="text-xs text-muted-foreground">
