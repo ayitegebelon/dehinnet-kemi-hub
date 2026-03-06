@@ -71,7 +71,7 @@ const Footer: React.FC = () => {
             </h4>
             <ul className="space-y-2">
               <li className="flex items-center gap-2 text-background/70">
-                <span className="text-ethiopian-red font-bold">911</span> - {t('emergency.police')}
+                <span className="text-ethiopian-red font-bold">991</span> - {t('emergency.police')}
               </li>
               <li className="flex items-center gap-2 text-background/70">
                 <span className="text-ethiopian-red font-bold">907</span> - {t('emergency.ambulance')}
