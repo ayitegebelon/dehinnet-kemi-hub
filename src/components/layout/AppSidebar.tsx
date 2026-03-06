@@ -22,6 +22,10 @@ import {
   BarChart3,
   Bot,
   BookOpen,
+  Gamepad2,
+  Blocks,
+  FileText,
+  Microscope,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -40,6 +44,7 @@ import logo from '@/assets/logo.png';
 
 const AppSidebar: React.FC = () => {
   const { t, language } = useLanguage();
+  const isAm = language === 'am';
   const { user, profile, signOut, isAdmin, isSuperAdmin } = useAuth();
   const location = useLocation();
   const { state } = useSidebar();
@@ -49,17 +54,21 @@ const AppSidebar: React.FC = () => {
 
   const mainNav = [
     { path: '/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
+    { path: '/virtual-lab', label: isAm ? 'ቨርቹዋል ላብ' : 'Virtual Lab', icon: Microscope },
     { path: '/recipes', label: t('nav.recipes'), icon: FlaskConical },
-    { path: '/projects', label: language === 'am' ? 'ፕሮጀክቶች' : 'Projects', icon: FolderKanban },
-    { path: '/learn', label: language === 'am' ? 'ትምህርት' : 'Learn', icon: GraduationCap },
-    { path: '/flashcards', label: language === 'am' ? 'ፍላሽ ካርድ' : 'Flashcards', icon: Brain },
-    { path: '/ai-assistant', label: language === 'am' ? 'AI ረዳት' : 'AI Assistant', icon: Bot },
-    { path: '/lab-notebook', label: language === 'am' ? 'ላብ ማስታወሻ' : 'Lab Notebook', icon: BookOpen },
-    { path: '/analytics', label: language === 'am' ? 'ትንተና' : 'Analytics', icon: BarChart3 },
-    { path: '/leaderboard', label: language === 'am' ? 'ደረጃ ሰንጠረዥ' : 'Leaderboard', icon: Trophy },
-    { path: '/discussion', label: language === 'am' ? 'ውይይት' : 'Discussion', icon: MessagesSquare },
-    { path: '/notifications', label: language === 'am' ? 'ማሳወቂያዎች' : 'Notifications', icon: Bell },
-    { path: '/certificates', label: language === 'am' ? 'ምስክር ወረቀቶች' : 'Certificates', icon: Award },
+    { path: '/projects', label: isAm ? 'ፕሮጀክቶች' : 'Projects', icon: FolderKanban },
+    { path: '/learn', label: isAm ? 'ትምህርት' : 'Learn', icon: GraduationCap },
+    { path: '/flashcards', label: isAm ? 'ፍላሽ ካርድ' : 'Flashcards', icon: Brain },
+    { path: '/games', label: isAm ? 'ጨዋታዎች' : 'Games', icon: Gamepad2 },
+    { path: '/molecule-builder', label: isAm ? 'ሞለኪዩል ገንቢ' : 'Molecule Builder', icon: Blocks },
+    { path: '/formula-sheet', label: isAm ? 'ቀመር ሉህ' : 'Formula Sheet', icon: FileText },
+    { path: '/ai-assistant', label: isAm ? 'AI ረዳት' : 'AI Assistant', icon: Bot },
+    { path: '/lab-notebook', label: isAm ? 'ላብ ማስታወሻ' : 'Lab Notebook', icon: BookOpen },
+    { path: '/analytics', label: isAm ? 'ትንተና' : 'Analytics', icon: BarChart3 },
+    { path: '/leaderboard', label: isAm ? 'ደረጃ ሰንጠረዥ' : 'Leaderboard', icon: Trophy },
+    { path: '/discussion', label: isAm ? 'ውይይት' : 'Discussion', icon: MessagesSquare },
+    { path: '/notifications', label: isAm ? 'ማሳወቂያዎች' : 'Notifications', icon: Bell },
+    { path: '/certificates', label: isAm ? 'ምስክር ወረቀቶች' : 'Certificates', icon: Award },
     { path: '/periodic-table', label: t('nav.periodic'), icon: Atom },
     { path: '/calculator', label: t('nav.calculator'), icon: Calculator },
     { path: '/safety', label: t('nav.safety'), icon: Shield },

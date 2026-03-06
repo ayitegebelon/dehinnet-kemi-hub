@@ -17,7 +17,7 @@ const EmergencyButton: React.FC = () => {
   const emergencyNumbers = [
     { 
       name: language === 'am' ? 'ፖሊስ' : 'Police', 
-      number: '911', 
+      number: '991', 
       icon: Shield,
       color: 'bg-blue-500 hover:bg-blue-600' 
     },
