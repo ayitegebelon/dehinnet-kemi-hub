@@ -22,10 +22,7 @@ import {
   BarChart3,
   Bot,
   BookOpen,
-  Gamepad2,
   Blocks,
-  FileText,
-  Microscope,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -54,14 +51,12 @@ const AppSidebar: React.FC = () => {
 
   const mainNav = [
     { path: '/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard },
-    { path: '/virtual-lab', label: isAm ? 'ቨርቹዋል ላብ' : 'Virtual Lab', icon: Microscope },
+    
     { path: '/recipes', label: t('nav.recipes'), icon: FlaskConical },
     { path: '/projects', label: isAm ? 'ፕሮጀክቶች' : 'Projects', icon: FolderKanban },
     { path: '/learn', label: isAm ? 'ትምህርት' : 'Learn', icon: GraduationCap },
     { path: '/flashcards', label: isAm ? 'ፍላሽ ካርድ' : 'Flashcards', icon: Brain },
-    { path: '/games', label: isAm ? 'ጨዋታዎች' : 'Games', icon: Gamepad2 },
     { path: '/molecule-builder', label: isAm ? 'ሞለኪዩል ገንቢ' : 'Molecule Builder', icon: Blocks },
-    { path: '/formula-sheet', label: isAm ? 'ቀመር ሉህ' : 'Formula Sheet', icon: FileText },
     { path: '/ai-assistant', label: isAm ? 'AI ረዳት' : 'AI Assistant', icon: Bot },
     { path: '/lab-notebook', label: isAm ? 'ላብ ማስታወሻ' : 'Lab Notebook', icon: BookOpen },
     { path: '/analytics', label: isAm ? 'ትንተና' : 'Analytics', icon: BarChart3 },

@@ -28,10 +28,7 @@ import VerifyCertificatePage from "./pages/VerifyCertificatePage";
 import StudyAnalyticsPage from "./pages/StudyAnalyticsPage";
 import AIAssistantPage from "./pages/AIAssistantPage";
 import LabNotebookPage from "./pages/LabNotebookPage";
-import ChemistryGamesPage from "./pages/ChemistryGamesPage";
 import MoleculeBuilderPage from "./pages/MoleculeBuilderPage";
-import FormulaSheetPage from "./pages/FormulaSheetPage";
-import VirtualLabPage from "./pages/VirtualLabPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -85,10 +82,7 @@ const AppRoutes = () => {
       <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
       <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
-      <Route path="/games" element={<ProtectedRoute><ChemistryGamesPage /></ProtectedRoute>} />
       <Route path="/molecule-builder" element={<ProtectedRoute><MoleculeBuilderPage /></ProtectedRoute>} />
-      <Route path="/formula-sheet" element={<ProtectedRoute><FormulaSheetPage /></ProtectedRoute>} />
-      <Route path="/virtual-lab" element={<ProtectedRoute><VirtualLabPage /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
