@@ -163,19 +163,30 @@ const ProjectDetailModal: React.FC<ProjectDetailModalProps> = ({ project, onClos
                 </div>
               </Card>
             ) : (
-              <Alert className="mt-6 border-primary/50 bg-primary/5">
-                <CheckCircle2 className="h-5 w-5 text-primary" />
-                <AlertTitle className="text-primary">
-                  {getText('Safety Verified!', 'ደህንነት ተረጋግጧል!', 'Nageenya Mirkanaa\'e!')}
-                </AlertTitle>
-                <AlertDescription>
-                  {getText(
-                    'You can now follow the step-by-step instructions below.',
-                    'አሁን ከታች ያሉትን ደረጃ በደረጃ መመሪያዎች መከተል ይችላሉ።',
-                    'Amma qajeelfama tarkaanfii tarkaanfiin gadii hordofuu dandeessa.'
-                  )}
-                </AlertDescription>
-              </Alert>
+              <Card className="mt-6 p-6 border-2 border-primary/50 bg-gradient-to-r from-primary/10 to-accent/10">
+                <div className="flex flex-col items-center text-center gap-4">
+                  <div className="w-20 h-20 rounded-full bg-primary/20 flex items-center justify-center relative">
+                    <CheckCircle2 className="w-10 h-10 text-primary" />
+                    <div className="absolute inset-0 rounded-full border-2 border-primary/30 animate-ping" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold mb-1 text-primary">
+                      {getText('Safety Verified! Experiment Ready', 'ደህንነት ተረጋግጧል! ሙከራ ዝግጁ ነው', 'Nageenya Mirkanaa\'e! Muuxannoon Qophaa\'e')}
+                    </h3>
+                    <p className="text-muted-foreground text-sm max-w-md">
+                      {getText(
+                        'Follow the 3D step-by-step instructions below. Use the Steps tab to navigate through each stage of the experiment.',
+                        'ከዚህ በታች ያሉትን የ3D ደረጃ በደረጃ መመሪያዎች ይከተሉ።',
+                        'Qajeelfama 3D tarkaanfii tarkaanfiin gadii hordofi.'
+                      )}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm text-primary">
+                    <Play className="w-4 h-4" />
+                    {getText('Scroll down to the Steps tab to begin', 'ለመጀመር ወደ ደረጃዎች ይሂዱ', 'Jalqabuuf gara Tarkaanfiiwwan bu\'i')}
+                  </div>
+                </div>
+              </Card>
             )}
 
             <Tabs defaultValue="steps" className="mt-6">
