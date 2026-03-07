@@ -41,7 +41,7 @@ const SafetyChecklistPage: React.FC = () => {
     if (projectContext) {
       // Verify safety for this specific project
       verifySafety(projectContext.projectId);
-      clearStartContext();
+      // Don't clear context here — ProjectsPage needs it to auto-open the project
       
       toast.success(
         getText(
