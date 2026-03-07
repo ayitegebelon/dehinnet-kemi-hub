@@ -22,10 +22,7 @@ import {
   BarChart3,
   Bot,
   BookOpen,
-  Gamepad2,
   Blocks,
-  FileText,
-  Microscope,
 } from 'lucide-react';
 import {
   Sidebar,
