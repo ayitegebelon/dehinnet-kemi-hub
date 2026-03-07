@@ -23,6 +23,8 @@ import {
   Bot,
   BookOpen,
   Blocks,
+  Zap,
+  Timer,
 } from 'lucide-react';
 import {
   Sidebar,
@@ -57,6 +59,9 @@ const AppSidebar: React.FC = () => {
     { path: '/learn', label: isAm ? 'ትምህርት' : 'Learn', icon: GraduationCap },
     { path: '/flashcards', label: isAm ? 'ፍላሽ ካርድ' : 'Flashcards', icon: Brain },
     { path: '/molecule-builder', label: isAm ? 'ሞለኪዩል ገንቢ' : 'Molecule Builder', icon: Blocks },
+    { path: '/reaction-simulator', label: isAm ? 'የምላሽ ሲሙሌተር' : 'Reaction Simulator', icon: Zap },
+    { path: '/element-quiz', label: isAm ? 'የንጥረ ነገር ጥያቄ' : 'Element Quiz', icon: Brain },
+    { path: '/lab-timer', label: isAm ? 'ላብ ሰዓት ቆጣሪ' : 'Lab Timer', icon: Timer },
     { path: '/ai-assistant', label: isAm ? 'AI ረዳት' : 'AI Assistant', icon: Bot },
     { path: '/lab-notebook', label: isAm ? 'ላብ ማስታወሻ' : 'Lab Notebook', icon: BookOpen },
     { path: '/analytics', label: isAm ? 'ትንተና' : 'Analytics', icon: BarChart3 },

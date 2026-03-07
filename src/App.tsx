@@ -29,6 +29,9 @@ import StudyAnalyticsPage from "./pages/StudyAnalyticsPage";
 import AIAssistantPage from "./pages/AIAssistantPage";
 import LabNotebookPage from "./pages/LabNotebookPage";
 import MoleculeBuilderPage from "./pages/MoleculeBuilderPage";
+import ReactionSimulatorPage from "./pages/ReactionSimulatorPage";
+import ElementQuizPage from "./pages/ElementQuizPage";
+import LabTimerPage from "./pages/LabTimerPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -83,6 +86,9 @@ const AppRoutes = () => {
       <Route path="/subscription" element={<ProtectedRoute><Subscription /></ProtectedRoute>} />
       <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
       <Route path="/molecule-builder" element={<ProtectedRoute><MoleculeBuilderPage /></ProtectedRoute>} />
+      <Route path="/reaction-simulator" element={<ProtectedRoute><ReactionSimulatorPage /></ProtectedRoute>} />
+      <Route path="/element-quiz" element={<ProtectedRoute><ElementQuizPage /></ProtectedRoute>} />
+      <Route path="/lab-timer" element={<ProtectedRoute><LabTimerPage /></ProtectedRoute>} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   );
