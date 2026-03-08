@@ -245,7 +245,67 @@ const Admin: React.FC = () => {
     }
   };
 
-  const handleCreateRecipe = async () => {
+  const openEditUser = (u: User) => {
+    setEditingUser(u);
+    setUserForm({
+      full_name: u.full_name || '', father_name: u.father_name || '', phone: u.phone || '',
+      age: u.age?.toString() || '', skill_level: u.skill_level || 'beginner',
+      subscription_tier: u.subscription_tier || 'free', safety_score: String(u.safety_score ?? 100),
+    });
+    setIsUserDialogOpen(true);
+  };
+
+  const handleSaveUser = async () => {
+    if (!editingUser) return;
+    try {
+      const { error } = await supabase.from('profiles').update({
+        full_name: userForm.full_name,
+        father_name: userForm.father_name || null,
+        phone: userForm.phone || null,
+        age: userForm.age ? parseInt(userForm.age) : null,
+        skill_level: userForm.skill_level as any,
+        subscription_tier: userForm.subscription_tier as any,
+        safety_score: parseInt(userForm.safety_score) || 100,
+      } as any).eq('user_id', editingUser.user_id);
+      if (error) throw error;
+      toast.success('User updated successfully');
+      setIsUserDialogOpen(false);
+      setEditingUser(null);
+      fetchData();
+    } catch (error) {
+      console.error('Error updating user:', error);
+      toast.error('Failed to update user');
+    }
+  };
+
+  const handleDeleteUser = async (u: User) => {
+    if (!confirm(`Are you sure you want to delete user "${u.full_name}"? This will remove their profile and all associated data.`)) return;
+    try {
+      // Delete related data first
+      await Promise.all([
+        supabase.from('user_progress').delete().eq('user_id', u.user_id),
+        supabase.from('achievements').delete().eq('user_id', u.user_id),
+        supabase.from('certificates').delete().eq('user_id', u.user_id),
+        supabase.from('experiments').delete().eq('user_id', u.user_id),
+        supabase.from('study_streaks').delete().eq('user_id', u.user_id),
+        supabase.from('notifications').delete().eq('user_id', u.user_id),
+        supabase.from('user_roles').delete().eq('user_id', u.user_id),
+        supabase.from('lab_notebook').delete().eq('user_id', u.user_id),
+      ]);
+      const { error } = await supabase.from('profiles').delete().eq('user_id', u.user_id);
+      if (error) throw error;
+      toast.success('User deleted successfully');
+      fetchData();
+    } catch (error) {
+      console.error('Error deleting user:', error);
+      toast.error('Failed to delete user. Some data may require manual cleanup.');
+    }
+  };
+
+  const openViewUser = (u: User) => {
+    setViewingUser(u);
+    setIsUserDetailOpen(true);
+  };
     try {
       const { error } = await supabase.from('recipes').insert({
         name_en: recipeForm.name_en, name_am: recipeForm.name_am,
