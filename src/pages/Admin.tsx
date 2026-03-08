@@ -19,7 +19,7 @@ import { toast } from 'sonner';
 import {
   Users, FlaskConical, BarChart3, Shield, Search, Plus, Edit, Trash2,
   Crown, TrendingUp, Activity, DollarSign, BookOpen, Video, HelpCircle,
-  AlertTriangle, Eye
+  AlertTriangle, Eye, Settings, Upload, Image
 } from 'lucide-react';
 
 interface User {
