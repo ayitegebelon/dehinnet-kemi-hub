@@ -207,7 +207,7 @@ const CertificatesPage: React.FC = () => {
     font-family:'Inter',sans-serif;font-size:9px;color:#d4af37;}
   
   /* Seal */
-  .seal{position:absolute;bottom:28mm;left:50%;transform:translateX(-50%);z-index:12;}
+  .seal{position:absolute;bottom:20mm;left:50%;transform:translateX(-50%);z-index:12;}
   .seal-outer{width:28mm;height:28mm;border-radius:50%;
     background:linear-gradient(135deg,#d4af37 0%,#f5d680 35%,#d4af37 65%,#b8942e 100%);
     display:flex;align-items:center;justify-content:center;
