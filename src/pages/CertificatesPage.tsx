@@ -221,8 +221,8 @@ const CertificatesPage: React.FC = () => {
   .seal-big{font-family:'Cinzel',serif;font-size:7px;color:#fff;font-weight:700;letter-spacing:1px;}
   
   /* Ribbon tails */
-  .ribbon{position:absolute;bottom:18mm;left:50%;transform:translateX(-50%);z-index:11;display:flex;gap:6mm;}
-  .ribbon-tail{width:8mm;height:14mm;background:linear-gradient(180deg,#d4af37,#b8942e);clip-path:polygon(0 0,100% 0,100% 70%,50% 100%,0 70%);}
+   .ribbon{position:absolute;bottom:33mm;right:28mm;z-index:11;display:flex;gap:4mm;}
+   .ribbon-tail{width:6mm;height:10mm;background:linear-gradient(180deg,#d4af37,#b8942e);clip-path:polygon(0 0,100% 0,100% 70%,50% 100%,0 70%);}
   
   /* Signatures */
   .signatures{position:absolute;bottom:18mm;left:50mm;right:50mm;display:flex;justify-content:space-between;z-index:12;}
