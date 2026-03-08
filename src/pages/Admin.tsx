@@ -19,7 +19,7 @@ import { toast } from 'sonner';
 import {
   Users, FlaskConical, BarChart3, Shield, Search, Plus, Edit, Trash2,
   Crown, TrendingUp, Activity, DollarSign, BookOpen, Video, HelpCircle,
-  AlertTriangle, Eye, Settings, Upload, Image
+  AlertTriangle, Eye, Settings, Upload, Image, Bell, Send, CheckCircle2
 } from 'lucide-react';
 
 interface User {
@@ -157,6 +157,14 @@ const Admin: React.FC = () => {
     full_name: '', father_name: '', phone: '', age: '', skill_level: 'beginner',
     subscription_tier: 'free', safety_score: '100',
   });
+
+  // Notification state
+  const [notifTarget, setNotifTarget] = useState<'all' | 'specific'>('all');
+  const [notifSelectedUsers, setNotifSelectedUsers] = useState<string[]>([]);
+  const [notifForm, setNotifForm] = useState({
+    title_en: '', title_am: '', message_en: '', message_am: '', type: 'info', link: '',
+  });
+  const [sendingNotif, setSendingNotif] = useState(false);
 
   const fetchSignature = async () => {
     const { data } = supabase.storage.from('signatures').getPublicUrl('director-signature.png');
@@ -548,17 +556,18 @@ const Admin: React.FC = () => {
 
         {/* Tabs */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-          <TabsList className="grid w-full grid-cols-7 mb-6">
-            <TabsTrigger value="users" className="flex items-center gap-2"><Users className="h-4 w-4" />{t('admin.users')}</TabsTrigger>
-            <TabsTrigger value="recipes" className="flex items-center gap-2"><FlaskConical className="h-4 w-4" />{t('admin.recipes')}</TabsTrigger>
-            <TabsTrigger value="courses" className="flex items-center gap-2"><BookOpen className="h-4 w-4" />Courses</TabsTrigger>
-            <TabsTrigger value="quizzes" className="flex items-center gap-2"><HelpCircle className="h-4 w-4" />Quizzes</TabsTrigger>
-            <TabsTrigger value="integrity" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-8 mb-6">
+            <TabsTrigger value="users" className="flex items-center gap-1 text-xs"><Users className="h-4 w-4" />{t('admin.users')}</TabsTrigger>
+            <TabsTrigger value="recipes" className="flex items-center gap-1 text-xs"><FlaskConical className="h-4 w-4" />{t('admin.recipes')}</TabsTrigger>
+            <TabsTrigger value="courses" className="flex items-center gap-1 text-xs"><BookOpen className="h-4 w-4" />Courses</TabsTrigger>
+            <TabsTrigger value="quizzes" className="flex items-center gap-1 text-xs"><HelpCircle className="h-4 w-4" />Quizzes</TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center gap-1 text-xs"><Bell className="h-4 w-4" />Notify</TabsTrigger>
+            <TabsTrigger value="integrity" className="flex items-center gap-1 text-xs">
               <AlertTriangle className="h-4 w-4" />Integrity
               {flaggedAttempts.length > 0 && <Badge variant="destructive" className="text-[10px] px-1.5 py-0">{flaggedAttempts.length}</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2"><BarChart3 className="h-4 w-4" />{t('admin.analytics')}</TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2"><Settings className="h-4 w-4" />Settings</TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-1 text-xs"><BarChart3 className="h-4 w-4" />{t('admin.analytics')}</TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-1 text-xs"><Settings className="h-4 w-4" />Settings</TabsTrigger>
           </TabsList>
 
           {/* Users Tab */}
