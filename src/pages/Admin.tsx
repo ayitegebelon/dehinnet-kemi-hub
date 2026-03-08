@@ -1077,6 +1077,92 @@ const Admin: React.FC = () => {
             </Dialog>
           </TabsContent>
 
+          {/* Notifications Tab */}
+          <TabsContent value="notifications">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Bell className="h-5 w-5 text-primary" />Send Notifications</CardTitle>
+                <CardDescription>Send announcements to all users or specific individuals</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Target Selection */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Send To</Label>
+                  <div className="flex gap-3">
+                    <Button variant={notifTarget === 'all' ? 'default' : 'outline'} onClick={() => setNotifTarget('all')} className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />All Users ({users.length})
+                    </Button>
+                    <Button variant={notifTarget === 'specific' ? 'default' : 'outline'} onClick={() => setNotifTarget('specific')} className="flex items-center gap-2">
+                      <Eye className="h-4 w-4" />Specific Users
+                    </Button>
+                  </div>
+                </div>
+
+                {/* User selection for specific */}
+                {notifTarget === 'specific' && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Select Users ({notifSelectedUsers.length} selected)</Label>
+                    <div className="max-h-48 overflow-y-auto border rounded-lg p-2 space-y-1">
+                      {users.map(u => (
+                        <label key={u.user_id} className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={notifSelectedUsers.includes(u.user_id)}
+                            onChange={() => toggleUserSelection(u.user_id)}
+                            className="rounded"
+                          />
+                          <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+                            {u.full_name?.charAt(0)}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{u.full_name}</p>
+                            <p className="text-xs text-muted-foreground">{u.email}</p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Notification Form */}
+                <div className="grid gap-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2"><Label>Title (English) *</Label><Input value={notifForm.title_en} onChange={(e) => setNotifForm({...notifForm, title_en: e.target.value})} placeholder="New course available!" /></div>
+                    <div className="space-y-2"><Label>Title (Amharic) *</Label><Input value={notifForm.title_am} onChange={(e) => setNotifForm({...notifForm, title_am: e.target.value})} placeholder="አዲስ ኮርስ ተገኝቷል!" /></div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2"><Label>Message (English) *</Label><Textarea value={notifForm.message_en} onChange={(e) => setNotifForm({...notifForm, message_en: e.target.value})} placeholder="We have exciting new content..." rows={3} /></div>
+                    <div className="space-y-2"><Label>Message (Amharic) *</Label><Textarea value={notifForm.message_am} onChange={(e) => setNotifForm({...notifForm, message_am: e.target.value})} placeholder="አዲስ ይዘት አለን..." rows={3} /></div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2"><Label>Type</Label>
+                      <Select value={notifForm.type} onValueChange={(v) => setNotifForm({...notifForm, type: v})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="info">ℹ️ Info</SelectItem>
+                          <SelectItem value="success">✅ Success</SelectItem>
+                          <SelectItem value="warning">⚠️ Warning</SelectItem>
+                          <SelectItem value="announcement">📢 Announcement</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2"><Label>Link (optional)</Label><Input value={notifForm.link} onChange={(e) => setNotifForm({...notifForm, link: e.target.value})} placeholder="/learn or /dashboard" /></div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <Button onClick={handleSendNotification} disabled={sendingNotif} size="lg" className="flex items-center gap-2">
+                    {sendingNotif ? (
+                      <><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground" /> Sending...</>
+                    ) : (
+                      <><Send className="h-4 w-4" /> Send Notification</>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           {/* Integrity / Flagged Attempts Tab */}
           <TabsContent value="integrity">
             <Card>
