@@ -139,12 +139,53 @@ const Admin: React.FC = () => {
     correct_answer: '0', explanation_en: '', explanation_am: '',
   });
 
+  // Signature state
+  const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
+  const [uploadingSignature, setUploadingSignature] = useState(false);
+
+  const fetchSignature = async () => {
+    const { data } = supabase.storage.from('signatures').getPublicUrl('director-signature.png');
+    // Check if file exists
+    const res = await fetch(data.publicUrl, { method: 'HEAD' });
+    if (res.ok) setSignatureUrl(data.publicUrl);
+    else setSignatureUrl(null);
+  };
+
+  const handleSignatureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingSignature(true);
+    try {
+      // Remove old file first
+      await supabase.storage.from('signatures').remove(['director-signature.png']);
+      const { error } = await supabase.storage.from('signatures').upload('director-signature.png', file, { upsert: true });
+      if (error) throw error;
+      toast.success('Signature uploaded successfully!');
+      await fetchSignature();
+    } catch (err: any) {
+      toast.error(err.message || 'Failed to upload signature');
+    } finally {
+      setUploadingSignature(false);
+    }
+  };
+
+  const handleRemoveSignature = async () => {
+    try {
+      await supabase.storage.from('signatures').remove(['director-signature.png']);
+      setSignatureUrl(null);
+      toast.success('Signature removed');
+    } catch {
+      toast.error('Failed to remove signature');
+    }
+  };
+
   useEffect(() => {
     if (!isAdmin && !isSuperAdmin) {
       navigate('/dashboard');
       return;
     }
     fetchData();
+    fetchSignature();
   }, [isAdmin, isSuperAdmin, navigate]);
 
   const fetchData = async () => {
@@ -430,7 +471,7 @@ const Admin: React.FC = () => {
 
         {/* Tabs */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-          <TabsList className="grid w-full grid-cols-6 mb-6">
+          <TabsList className="grid w-full grid-cols-7 mb-6">
             <TabsTrigger value="users" className="flex items-center gap-2"><Users className="h-4 w-4" />{t('admin.users')}</TabsTrigger>
             <TabsTrigger value="recipes" className="flex items-center gap-2"><FlaskConical className="h-4 w-4" />{t('admin.recipes')}</TabsTrigger>
             <TabsTrigger value="courses" className="flex items-center gap-2"><BookOpen className="h-4 w-4" />Courses</TabsTrigger>
@@ -440,6 +481,7 @@ const Admin: React.FC = () => {
               {flaggedAttempts.length > 0 && <Badge variant="destructive" className="text-[10px] px-1.5 py-0">{flaggedAttempts.length}</Badge>}
             </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-2"><BarChart3 className="h-4 w-4" />{t('admin.analytics')}</TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-2"><Settings className="h-4 w-4" />Settings</TabsTrigger>
           </TabsList>
 
           {/* Users Tab */}
@@ -921,6 +963,64 @@ const Admin: React.FC = () => {
                 </CardContent>
               </Card>
             </div>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Settings className="h-5 w-5" />Certificate Settings</CardTitle>
+                <CardDescription>Manage director signature for certificates</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div>
+                    <Label className="text-base font-semibold mb-3 block">Director Signature</Label>
+                    <p className="text-sm text-muted-foreground mb-4">
+                      Upload the director's signature image. This will appear on all certificates when students download them.
+                    </p>
+                    
+                    {signatureUrl ? (
+                      <div className="space-y-4">
+                        <div className="border rounded-lg p-6 bg-muted/30 flex flex-col items-center gap-4">
+                          <p className="text-sm text-muted-foreground">Current Signature:</p>
+                          <img src={signatureUrl + '?t=' + Date.now()} alt="Director Signature" className="max-h-24 max-w-xs object-contain" />
+                        </div>
+                        <div className="flex gap-3">
+                          <Button variant="outline" onClick={() => document.getElementById('sig-upload')?.click()}>
+                            <Upload className="h-4 w-4 mr-2" />Replace Signature
+                          </Button>
+                          <Button variant="destructive" size="sm" onClick={handleRemoveSignature}>
+                            <Trash2 className="h-4 w-4 mr-2" />Remove
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="border-2 border-dashed rounded-lg p-8 text-center">
+                        <Image className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
+                        <p className="text-muted-foreground mb-3">No signature uploaded yet</p>
+                        <Button onClick={() => document.getElementById('sig-upload')?.click()} disabled={uploadingSignature}>
+                          <Upload className="h-4 w-4 mr-2" />
+                          {uploadingSignature ? 'Uploading...' : 'Upload Signature'}
+                        </Button>
+                      </div>
+                    )}
+                    
+                    <input
+                      id="sig-upload"
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleSignatureUpload}
+                    />
+                    
+                    <p className="text-xs text-muted-foreground mt-3">
+                      Recommended: PNG with transparent background, approximately 300×100 pixels.
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </div>
