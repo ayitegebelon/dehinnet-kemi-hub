@@ -150,6 +150,8 @@ const AppSidebar: React.FC = () => {
 
   const showAdmin = (isAdmin || isSuperAdmin) && (!query || 'admin'.includes(query));
 
+  if (!user) return null;
+
   return (
     <Sidebar collapsible="icon" className="border-r border-sidebar-border">
       {/* Logo */}
