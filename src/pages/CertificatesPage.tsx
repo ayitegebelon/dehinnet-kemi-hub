@@ -307,9 +307,10 @@ const CertificatesPage: React.FC = () => {
     <div class="cert-date">Date of Issue: ${issueDate}</div>
   </div>
   
-  <div class="qr-area">
-    <img class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyUrl)}&format=svg" alt="QR"/>
-    <div class="qr-label">Scan to Verify</div>
+  <div class="verify-area">
+    <div class="verify-label">Verification</div>
+    <div class="verify-value">${cert.certificate_number}</div>
+    <div class="verify-note">Verify at Safety First Chemistry Academy</div>
   </div>
 </div>
 </body></html>`;
