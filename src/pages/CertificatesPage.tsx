@@ -303,7 +303,7 @@ const CertificatesPage: React.FC = () => {
       <div class="sig-title">Date</div>
     </div>
     <div class="sig-block">
-      <div class="sig-name">Ayitegeb Tilahun</div>
+      ${signatureImgUrl ? `<img src="${signatureImgUrl}" alt="Director Signature" style="max-height:12mm;max-width:45mm;object-fit:contain;margin:0 auto 2mm;" />` : '<div style="height:12mm;"></div>'}
       <div class="sig-line"></div>
       <div class="sig-title">Director Signature</div>
     </div>
@@ -316,9 +316,8 @@ const CertificatesPage: React.FC = () => {
   </div>
   
   <div class="verify-area">
-    <div class="verify-label">Verification</div>
-    <div class="verify-value">${cert.certificate_number}</div>
-    <div class="verify-note">Verify at Safety First Chemistry Academy</div>
+    <div class="verify-label">Verify at</div>
+    <div class="verify-note">Safety First Chemistry Academy</div>
   </div>
 </div>
 </body></html>`;
