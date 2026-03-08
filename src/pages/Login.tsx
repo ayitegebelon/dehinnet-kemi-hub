@@ -26,7 +26,10 @@ const Login: React.FC = () => {
     const { error } = await signIn(email, password);
     
     if (error) {
-      toast({ title: t('common.error'), description: error.message, variant: 'destructive' });
+      const friendlyMsg = error.message === 'Invalid login credentials'
+        ? (language === 'am' ? 'ኢሜል ወይም የይለፍ ቃል ስህተት ነው። እባክዎ እንደገና ይሞክሩ።' : 'Incorrect email or password. Please check your credentials and try again.')
+        : error.message;
+      toast({ title: t('common.error'), description: friendlyMsg, variant: 'destructive' });
     } else {
       toast({ title: t('common.success'), description: language === 'am' ? 'እንኳን ደህና መጡ!' : 'Welcome back!' });
       navigate('/dashboard');

@@ -166,7 +166,7 @@ const CertificatesPage: React.FC = () => {
   
   /* Logo area */
   .logo-area{margin-bottom:4mm;display:flex;align-items:center;gap:3mm;}
-  .logo-icon{font-size:22px;}
+  .logo-img{width:12mm;height:12mm;border-radius:3mm;object-fit:cover;}
   .logo-text{font-family:'Cinzel',serif;font-size:10px;color:#d4af37;letter-spacing:4px;text-transform:uppercase;}
   
   /* Title */
@@ -247,7 +247,7 @@ const CertificatesPage: React.FC = () => {
   
   <div class="content">
     <div class="logo-area">
-      <div class="logo-icon">🧪</div>
+      <img class="logo-img" src="https://i.ibb.co/7tTFPvx5/Chat-GPT-Image-Jan-10-2026-03-23-18-PM.png" alt="Logo" />
       <div class="logo-text">Safety First Chemistry Academy</div>
     </div>
     
