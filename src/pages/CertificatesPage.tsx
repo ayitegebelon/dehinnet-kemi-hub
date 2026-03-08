@@ -206,15 +206,15 @@ const CertificatesPage: React.FC = () => {
   .score-pill{padding:2mm 6mm;border:1px solid rgba(212,175,55,0.3);border-radius:20px;
     font-family:'Inter',sans-serif;font-size:9px;color:#d4af37;}
   
-  /* Seal */
-  .seal{position:absolute;bottom:20mm;left:50%;transform:translateX(-50%);z-index:12;}
-  .seal-outer{width:28mm;height:28mm;border-radius:50%;
+   /* Seal */
+   .seal{position:absolute;bottom:35mm;right:25mm;z-index:12;}
+   .seal-outer{width:22mm;height:22mm;border-radius:50%;
     background:linear-gradient(135deg,#d4af37 0%,#f5d680 35%,#d4af37 65%,#b8942e 100%);
     display:flex;align-items:center;justify-content:center;
     box-shadow:0 4px 25px rgba(212,175,55,0.4);}
-  .seal-mid{width:24mm;height:24mm;border-radius:50%;border:1px solid rgba(255,255,255,0.3);
+  .seal-mid{width:18mm;height:18mm;border-radius:50%;border:1px solid rgba(255,255,255,0.3);
     display:flex;align-items:center;justify-content:center;}
-  .seal-inner{width:20mm;height:20mm;border-radius:50%;border:1px solid rgba(255,255,255,0.2);
+  .seal-inner{width:14mm;height:14mm;border-radius:50%;border:1px solid rgba(255,255,255,0.2);
     display:flex;flex-direction:column;align-items:center;justify-content:center;}
   .seal-icon{font-size:12px;margin-bottom:1mm;}
   .seal-label{font-family:'Cinzel',serif;font-size:5px;color:#fff;letter-spacing:2px;text-transform:uppercase;}
