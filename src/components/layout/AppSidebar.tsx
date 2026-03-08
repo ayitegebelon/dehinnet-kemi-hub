@@ -70,8 +70,6 @@ const AppSidebar: React.FC = () => {
   const collapsed = state === 'collapsed';
   const [search, setSearch] = useState('');
 
-  if (!user) return null;
-
   const navGroups: NavGroup[] = [
     {
       label: isAm ? 'ዋና' : 'Overview',
