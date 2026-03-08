@@ -247,7 +247,7 @@ const CertificatesPage: React.FC = () => {
   
   <div class="content">
     <div class="logo-area">
-      <div class="logo-icon">🧪</div>
+      <img class="logo-img" src="https://i.ibb.co/7tTFPvx5/Chat-GPT-Image-Jan-10-2026-03-23-18-PM.png" alt="Logo" />
       <div class="logo-text">Safety First Chemistry Academy</div>
     </div>
     
