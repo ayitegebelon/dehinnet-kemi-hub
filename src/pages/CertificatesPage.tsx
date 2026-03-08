@@ -109,172 +109,207 @@ const CertificatesPage: React.FC = () => {
   const downloadCertificate = (cert: any) => {
     const grade = getGradeLabel(cert.quiz_average);
     const verifyUrl = `${window.location.origin}/verify/${cert.certificate_number}`;
-    
-    // Split student name into first name and father name
     const nameParts = cert.student_name.split(' ');
     const firstName = nameParts[0] || '';
     const fatherNamePart = nameParts.slice(1).join(' ') || '';
-    
+    const issueDate = new Date(cert.completion_date).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
     const html = `<!DOCTYPE html>
 <html><head><meta charset="utf-8"><title>Certificate - ${cert.student_name}</title>
 <style>
-  @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
-  * { margin:0; padding:0; box-sizing:border-box; }
-  @page { size:landscape A4; margin:0; }
-  body { width:297mm; height:210mm; font-family:'Inter',sans-serif; background:#fff; display:flex; align-items:center; justify-content:center; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;0,700;1,400&family=Inter:wght@300;400;500;600&display=swap');
+  *{margin:0;padding:0;box-sizing:border-box;}
+  @page{size:landscape A4;margin:0;}
+  body{width:297mm;height:210mm;font-family:'Inter',sans-serif;background:#888;display:flex;align-items:center;justify-content:center;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
   
-  .cert-wrap { width:293mm; height:207mm; position:relative; overflow:hidden; background:linear-gradient(135deg, #faf9f6 0%, #fff 30%, #faf9f6 100%); }
+  .cert-wrap{width:293mm;height:207mm;position:relative;overflow:hidden;background:#1a1a1a;}
   
-  /* Elegant border frame */
-  .outer-border { position:absolute; inset:6mm; border:2px solid #0d7377; }
-  .inner-border { position:absolute; inset:9mm; border:1px solid rgba(212,175,55,0.4); }
-  .decorative-border { position:absolute; inset:11mm; border:1px solid rgba(13,115,119,0.15); }
+  /* Dark geometric background */
+  .bg-pattern{position:absolute;inset:0;background:
+    linear-gradient(135deg,#1a1a1a 0%,#222 25%,#1a1a1a 50%,#222 75%,#1a1a1a 100%);
+    z-index:0;}
+  .bg-triangles{position:absolute;bottom:0;right:0;width:50%;height:50%;
+    background:repeating-conic-gradient(#1e1e1e 0% 25%,#222 0% 50%) 0 0/20px 20px;
+    opacity:0.4;z-index:1;}
+  .bg-triangles-left{position:absolute;bottom:0;left:0;width:30%;height:40%;
+    background:repeating-conic-gradient(#1e1e1e 0% 25%,#222 0% 50%) 0 0/20px 20px;
+    opacity:0.3;z-index:1;}
   
-  /* Corner ornaments */
-  .corner { position:absolute; width:25mm; height:25mm; z-index:5; }
-  .corner-tl { top:7mm; left:7mm; border-top:3px solid #d4af37; border-left:3px solid #d4af37; }
-  .corner-tr { top:7mm; right:7mm; border-top:3px solid #d4af37; border-right:3px solid #d4af37; }
-  .corner-bl { bottom:7mm; left:7mm; border-bottom:3px solid #d4af37; border-left:3px solid #d4af37; }
-  .corner-br { bottom:7mm; right:7mm; border-bottom:3px solid #d4af37; border-right:3px solid #d4af37; }
+  /* Gold diagonal accents - top left */
+  .gold-accent-tl{position:absolute;top:0;left:0;width:0;height:0;
+    border-top:90mm solid rgba(212,175,55,0.15);border-right:90mm solid transparent;z-index:2;}
+  .gold-accent-tl2{position:absolute;top:0;left:0;width:0;height:0;
+    border-top:80mm solid rgba(212,175,55,0.08);border-right:80mm solid transparent;z-index:2;}
+  .gold-line-tl{position:absolute;top:0;left:0;width:120mm;height:2px;
+    background:linear-gradient(90deg,#d4af37,transparent);transform-origin:top left;transform:rotate(45deg);z-index:3;}
   
-  /* Side accent bars */
-  .accent-left { position:absolute; top:35mm; left:6mm; width:4mm; height:50mm; background:linear-gradient(180deg, #0d7377, #0a5c5f, #0d7377); z-index:3; }
-  .accent-right { position:absolute; top:35mm; right:6mm; width:4mm; height:50mm; background:linear-gradient(180deg, #0d7377, #0a5c5f, #0d7377); z-index:3; }
+  /* Gold diagonal accents - top right */
+  .gold-accent-tr{position:absolute;top:0;right:0;width:0;height:0;
+    border-top:70mm solid rgba(212,175,55,0.12);border-left:70mm solid transparent;z-index:2;}
+  
+  /* Gold diagonal accents - bottom left */
+  .gold-accent-bl{position:absolute;bottom:0;left:0;width:0;height:0;
+    border-bottom:60mm solid rgba(212,175,55,0.1);border-right:60mm solid transparent;z-index:2;}
+  
+  /* Gold diagonal accents - bottom right */
+  .gold-accent-br{position:absolute;bottom:0;right:0;width:0;height:0;
+    border-bottom:80mm solid rgba(212,175,55,0.12);border-left:80mm solid transparent;z-index:2;}
+  .gold-line-br{position:absolute;bottom:0;right:0;width:100mm;height:2px;
+    background:linear-gradient(90deg,transparent,#d4af37);transform-origin:bottom right;transform:rotate(45deg);z-index:3;}
+  
+  /* Gold bottom bar */
+  .gold-bottom-bar{position:absolute;bottom:0;left:0;right:0;height:3px;
+    background:linear-gradient(90deg,transparent 5%,#d4af37 30%,#f5d680 50%,#d4af37 70%,transparent 95%);z-index:4;}
   
   /* Content */
-  .content { position:absolute; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; padding:20mm 50mm; text-align:center; z-index:4; }
+  .content{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18mm 45mm;text-align:center;z-index:10;}
   
-  /* Organization header */
-  .org-header { display:flex; align-items:center; gap:4mm; margin-bottom:6mm; }
-  .org-icon { font-size:28px; }
-  .org-info { text-align:left; }
-  .org-name { font-family:'Cinzel',serif; font-size:14px; font-weight:700; color:#0d7377; letter-spacing:2px; }
-  .org-tagline { font-family:'Inter',sans-serif; font-size:8px; color:#888; letter-spacing:3px; text-transform:uppercase; }
+  /* Logo area */
+  .logo-area{margin-bottom:4mm;display:flex;align-items:center;gap:3mm;}
+  .logo-icon{font-size:22px;}
+  .logo-text{font-family:'Cinzel',serif;font-size:10px;color:#d4af37;letter-spacing:4px;text-transform:uppercase;}
+  
+  /* Title */
+  .cert-title{font-family:'Great Vibes',cursive;font-size:52px;color:#fff;margin-bottom:1mm;line-height:1.1;}
+  .cert-subtitle{font-family:'Cinzel',serif;font-size:13px;color:#d4af37;letter-spacing:8px;text-transform:uppercase;margin-bottom:6mm;}
   
   /* Divider */
-  .gold-divider { width:120mm; height:1px; background:linear-gradient(90deg, transparent, #d4af37, transparent); margin:4mm 0; }
-  .gold-divider-thick { width:80mm; height:2px; background:linear-gradient(90deg, transparent, #d4af37, #d4af37, transparent); margin:3mm 0; }
+  .gold-divider{width:100mm;height:1px;background:linear-gradient(90deg,transparent,#d4af37,transparent);margin:4mm 0;}
   
-  .cert-label { font-family:'Cinzel',serif; font-size:11px; letter-spacing:10px; text-transform:uppercase; color:#999; margin-bottom:2mm; }
-  .cert-title { font-family:'Cinzel',serif; font-size:38px; font-weight:700; color:#0a5c5f; letter-spacing:4px; margin-bottom:1mm; }
-  .cert-subtitle { font-family:'Cormorant Garamond',serif; font-style:italic; font-size:16px; color:#0d7377; letter-spacing:3px; font-weight:300; margin-bottom:5mm; }
+  /* Presented to */
+  .presented-to{font-family:'Cinzel',serif;font-size:11px;color:#d4af37;letter-spacing:6px;text-transform:uppercase;margin-bottom:5mm;}
   
-  .presented-to { font-family:'Cormorant Garamond',serif; font-size:12px; color:#888; text-transform:uppercase; letter-spacing:6px; margin-bottom:3mm; }
+  /* Student name */
+  .student-name{font-family:'Great Vibes',cursive;font-size:44px;color:#fff;line-height:1.2;margin-bottom:1mm;}
+  .student-father{font-family:'Cormorant Garamond',serif;font-size:26px;color:#ccc;font-weight:300;margin-bottom:3mm;}
+  .name-underline{width:90mm;height:1px;background:linear-gradient(90deg,transparent,#d4af37 30%,#d4af37 70%,transparent);margin:0 auto 5mm;}
   
-  .name-section { margin-bottom:5mm; }
-  .student-first-name { font-family:'Cormorant Garamond',serif; font-weight:700; font-size:36px; color:#1a1a1a; line-height:1.2; }
-  .student-father-name { font-family:'Cormorant Garamond',serif; font-weight:400; font-size:28px; color:#444; line-height:1.2; margin-top:1mm; }
-  .name-underline { width:100mm; height:2px; background:linear-gradient(90deg, transparent, #d4af37, transparent); margin:3mm auto 0; }
+  /* Description */
+  .desc-text{font-family:'Cormorant Garamond',serif;font-size:12px;color:#999;line-height:1.8;max-width:180mm;margin-bottom:2mm;}
+  .course-name{font-family:'Cinzel',serif;font-size:18px;color:#d4af37;letter-spacing:3px;text-transform:uppercase;margin:2mm 0;}
+  .desc-sub{font-family:'Cormorant Garamond',serif;font-size:11px;color:#888;font-style:italic;line-height:1.6;margin-bottom:4mm;}
   
-  .for-text { font-family:'Cormorant Garamond',serif; font-size:12px; color:#888; text-transform:uppercase; letter-spacing:5px; margin-bottom:2mm; }
-  .course-name { font-family:'Cormorant Garamond',serif; font-weight:600; font-size:20px; color:#0d7377; letter-spacing:1px; margin-bottom:4mm; }
+  /* Grade */
+  .grade-row{display:flex;align-items:center;gap:4mm;margin-bottom:5mm;}
+  .grade-pill{padding:2mm 7mm;border:1px solid ${grade.color};border-radius:20px;
+    font-family:'Cinzel',serif;font-size:8px;letter-spacing:3px;text-transform:uppercase;color:${grade.color};
+    background:${grade.color}15;}
+  .score-pill{padding:2mm 6mm;border:1px solid rgba(212,175,55,0.3);border-radius:20px;
+    font-family:'Inter',sans-serif;font-size:9px;color:#d4af37;}
   
-  .grade-section { display:flex; align-items:center; gap:4mm; margin-bottom:4mm; }
-  .grade-pill { padding:2mm 8mm; background:linear-gradient(135deg,${grade.color}15,${grade.color}08); border:1.5px solid ${grade.color}; border-radius:20px; font-family:'Cinzel',serif; font-size:9px; letter-spacing:3px; text-transform:uppercase; color:${grade.color}; }
-  .score-pill { padding:2mm 6mm; background:rgba(13,115,119,0.06); border:1px solid rgba(13,115,119,0.2); border-radius:20px; font-family:'Inter',sans-serif; font-size:9px; color:#0d7377; }
+  /* Seal */
+  .seal{position:absolute;bottom:28mm;left:50%;transform:translateX(-50%);z-index:12;}
+  .seal-outer{width:28mm;height:28mm;border-radius:50%;
+    background:linear-gradient(135deg,#d4af37 0%,#f5d680 35%,#d4af37 65%,#b8942e 100%);
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 4px 25px rgba(212,175,55,0.4);}
+  .seal-mid{width:24mm;height:24mm;border-radius:50%;border:1px solid rgba(255,255,255,0.3);
+    display:flex;align-items:center;justify-content:center;}
+  .seal-inner{width:20mm;height:20mm;border-radius:50%;border:1px solid rgba(255,255,255,0.2);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .seal-icon{font-size:12px;margin-bottom:1mm;}
+  .seal-label{font-family:'Cinzel',serif;font-size:5px;color:#fff;letter-spacing:2px;text-transform:uppercase;}
+  .seal-big{font-family:'Cinzel',serif;font-size:7px;color:#fff;font-weight:700;letter-spacing:1px;}
   
-  .date-text { font-family:'Cormorant Garamond',serif; font-size:12px; color:#999; font-style:italic; margin-bottom:3mm; }
+  /* Ribbon tails */
+  .ribbon{position:absolute;bottom:18mm;left:50%;transform:translateX(-50%);z-index:11;display:flex;gap:6mm;}
+  .ribbon-tail{width:8mm;height:14mm;background:linear-gradient(180deg,#d4af37,#b8942e);clip-path:polygon(0 0,100% 0,100% 70%,50% 100%,0 70%);}
   
   /* Signatures */
-  .signatures { position:absolute; bottom:25mm; left:55mm; right:55mm; display:flex; justify-content:space-between; z-index:5; }
-  .sig-block { text-align:center; width:50mm; }
-  .sig-line { width:100%; height:1px; background:linear-gradient(90deg, transparent, #ccc, transparent); margin-bottom:2mm; }
-  .sig-title { font-family:'Cinzel',serif; font-size:7px; color:#aaa; text-transform:uppercase; letter-spacing:2px; }
-  .sig-name { font-family:'Cormorant Garamond',serif; font-size:10px; color:#666; font-style:italic; margin-bottom:1mm; }
+  .signatures{position:absolute;bottom:18mm;left:50mm;right:50mm;display:flex;justify-content:space-between;z-index:12;}
+  .sig-block{text-align:center;width:50mm;}
+  .sig-line{width:100%;height:1px;background:linear-gradient(90deg,transparent,#555,transparent);margin-bottom:2mm;}
+  .sig-name{font-family:'Cormorant Garamond',serif;font-size:10px;color:#ccc;font-style:italic;margin-bottom:1mm;}
+  .sig-title{font-family:'Cinzel',serif;font-size:6px;color:#888;text-transform:uppercase;letter-spacing:2px;}
   
-  /* Gold seal */
-  .seal { position:absolute; bottom:30mm; left:50%; transform:translateX(-50%); z-index:6; }
-  .seal-outer { width:30mm; height:30mm; border-radius:50%; background:linear-gradient(135deg,#d4af37 0%,#f5d680 35%,#d4af37 65%,#b8942e 100%); display:flex; align-items:center; justify-content:center; box-shadow:0 4px 20px rgba(212,175,55,0.35); }
-  .seal-middle { width:26mm; height:26mm; border-radius:50%; border:1px solid rgba(255,255,255,0.4); display:flex; align-items:center; justify-content:center; }
-  .seal-inner { width:22mm; height:22mm; border-radius:50%; border:1px solid rgba(255,255,255,0.3); display:flex; flex-direction:column; align-items:center; justify-content:center; }
-  .seal-icon { font-size:14px; margin-bottom:1mm; }
-  .seal-text { font-family:'Cinzel',serif; font-size:6px; color:#fff; letter-spacing:2px; text-transform:uppercase; }
-  .seal-year { font-family:'Cinzel',serif; font-size:8px; color:#fff; font-weight:700; }
+  /* Certificate ID & QR */
+  .cert-id{position:absolute;bottom:8mm;left:20mm;z-index:12;text-align:left;}
+  .cert-id-label{font-family:'Inter',sans-serif;font-size:6px;color:#555;letter-spacing:1px;text-transform:uppercase;}
+  .cert-id-value{font-family:'JetBrains Mono',monospace;font-size:8px;color:#999;margin-top:1mm;}
+  .cert-date{font-family:'Inter',sans-serif;font-size:7px;color:#777;margin-top:1mm;}
   
-  /* QR */
-  .qr-area { position:absolute; bottom:20mm; right:20mm; z-index:5; text-align:center; }
-  .qr-img { width:14mm; height:14mm; border:1px solid #e5e5e5; border-radius:2mm; }
-  .qr-label { font-family:'Inter',sans-serif; font-size:5px; color:#ccc; letter-spacing:1px; text-transform:uppercase; margin-top:1mm; }
-  
-  /* Watermark */
-  .watermark { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%) rotate(-30deg); font-family:'Cinzel',serif; font-size:80px; color:rgba(13,115,119,0.03); letter-spacing:15px; text-transform:uppercase; z-index:1; white-space:nowrap; pointer-events:none; }
+  .qr-area{position:absolute;bottom:8mm;right:20mm;z-index:12;text-align:center;}
+  .qr-img{width:14mm;height:14mm;border:1px solid #333;border-radius:2mm;background:#fff;padding:1mm;}
+  .qr-label{font-family:'Inter',sans-serif;font-size:5px;color:#555;letter-spacing:1px;text-transform:uppercase;margin-top:1mm;}
 </style></head><body>
 <div class="cert-wrap">
-  <div class="watermark">ደህንነት ኬሚ</div>
-  <div class="outer-border"></div>
-  <div class="inner-border"></div>
-  <div class="decorative-border"></div>
-  <div class="corner corner-tl"></div>
-  <div class="corner corner-tr"></div>
-  <div class="corner corner-bl"></div>
-  <div class="corner corner-br"></div>
-  <div class="accent-left"></div>
-  <div class="accent-right"></div>
+  <div class="bg-pattern"></div>
+  <div class="bg-triangles"></div>
+  <div class="bg-triangles-left"></div>
+  <div class="gold-accent-tl"></div>
+  <div class="gold-accent-tl2"></div>
+  <div class="gold-line-tl"></div>
+  <div class="gold-accent-tr"></div>
+  <div class="gold-accent-bl"></div>
+  <div class="gold-accent-br"></div>
+  <div class="gold-line-br"></div>
+  <div class="gold-bottom-bar"></div>
   
   <div class="content">
-    <div class="org-header">
-      <div class="org-icon">🧪</div>
-      <div class="org-info">
-        <div class="org-name">ደህንነት ኬሚ</div>
-        <div class="org-tagline">Safety First Chemistry Academy</div>
-      </div>
+    <div class="logo-area">
+      <div class="logo-icon">🧪</div>
+      <div class="logo-text">Safety First Chemistry Academy</div>
     </div>
+    
+    <div class="cert-title">Certificate</div>
+    <div class="cert-subtitle">of Achievement</div>
     
     <div class="gold-divider"></div>
     
-    <div class="cert-label">Certificate</div>
-    <div class="cert-title">CERTIFICATE</div>
-    <div class="cert-subtitle">of Achievement & Excellence</div>
+    <div class="presented-to">Proudly Presented To</div>
     
-    <div class="gold-divider-thick"></div>
+    <div class="student-name">${firstName}</div>
+    ${fatherNamePart ? `<div class="student-father">${fatherNamePart}</div>` : ''}
+    <div class="name-underline"></div>
     
-    <div class="presented-to">This is to certify that</div>
-    
-    <div class="name-section">
-      <div class="student-first-name">${firstName}</div>
-      ${fatherNamePart ? `<div class="student-father-name">${fatherNamePart}</div>` : ''}
-      <div class="name-underline"></div>
-    </div>
-    
-    <div class="for-text">Has successfully completed the course</div>
+    <div class="desc-text">For successfully completing the course</div>
     <div class="course-name">${cert.course_title}</div>
+    <div class="desc-sub">at Safety First Chemistry Academy<br/>and demonstrating outstanding commitment to academic excellence.</div>
     
-    <div class="grade-section">
+    <div class="grade-row">
       <div class="grade-pill">${grade.label}</div>
       ${cert.quiz_average ? `<div class="score-pill">Score: ${cert.quiz_average}%</div>` : ''}
     </div>
-    
-    <div class="date-text">Awarded on ${new Date(cert.completion_date).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })}</div>
   </div>
   
   <div class="seal">
     <div class="seal-outer">
-      <div class="seal-middle">
+      <div class="seal-mid">
         <div class="seal-inner">
           <div class="seal-icon">🏆</div>
-          <div class="seal-text">Certified</div>
-          <div class="seal-year">${new Date().getFullYear()}</div>
+          <div class="seal-label">Best</div>
+          <div class="seal-big">AWARD</div>
         </div>
       </div>
     </div>
   </div>
+  <div class="ribbon">
+    <div class="ribbon-tail"></div>
+    <div class="ribbon-tail"></div>
+  </div>
   
   <div class="signatures">
     <div class="sig-block">
-      <div class="sig-name">Ayitegeb Tilahun</div>
+      <div class="sig-name">${issueDate}</div>
       <div class="sig-line"></div>
-      <div class="sig-title">Founder & Director</div>
+      <div class="sig-title">Date</div>
     </div>
     <div class="sig-block">
-      <div class="sig-name">${new Date(cert.completion_date).toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' })}</div>
+      <div class="sig-name">Ayitegeb Tilahun</div>
       <div class="sig-line"></div>
-      <div class="sig-title">Date of Issue</div>
+      <div class="sig-title">Director Signature</div>
     </div>
   </div>
   
+  <div class="cert-id">
+    <div class="cert-id-label">Certificate ID</div>
+    <div class="cert-id-value">${cert.certificate_number}</div>
+    <div class="cert-date">Date of Issue: ${issueDate}</div>
+  </div>
+  
   <div class="qr-area">
-    <img class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyUrl)}&format=svg" alt="QR" />
-    <div class="qr-label">Scan to verify</div>
+    <img class="qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyUrl)}&format=svg" alt="QR"/>
+    <div class="qr-label">Scan to Verify</div>
   </div>
 </div>
 </body></html>`;
