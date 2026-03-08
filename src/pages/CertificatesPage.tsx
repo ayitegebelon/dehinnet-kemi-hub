@@ -106,7 +106,15 @@ const CertificatesPage: React.FC = () => {
     return { label: 'Completed', color: '#0891b2' };
   };
 
-  const downloadCertificate = (cert: any) => {
+  const downloadCertificate = async (cert: any) => {
+    // Fetch director signature
+    const { data: sigData } = supabase.storage.from('signatures').getPublicUrl('director-signature.png');
+    let signatureImgUrl = '';
+    try {
+      const res = await fetch(sigData.publicUrl, { method: 'HEAD' });
+      if (res.ok) signatureImgUrl = sigData.publicUrl;
+    } catch {}
+
     const grade = getGradeLabel(cert.quiz_average);
     
     const nameParts = cert.student_name.split(' ');
