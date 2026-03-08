@@ -166,7 +166,7 @@ const CertificatesPage: React.FC = () => {
   
   /* Logo area */
   .logo-area{margin-bottom:4mm;display:flex;align-items:center;gap:3mm;}
-  .logo-icon{font-size:22px;}
+  .logo-img{width:12mm;height:12mm;border-radius:3mm;object-fit:cover;}
   .logo-text{font-family:'Cinzel',serif;font-size:10px;color:#d4af37;letter-spacing:4px;text-transform:uppercase;}
   
   /* Title */
