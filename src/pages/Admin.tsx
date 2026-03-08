@@ -306,6 +306,8 @@ const Admin: React.FC = () => {
     setViewingUser(u);
     setIsUserDetailOpen(true);
   };
+
+  const handleCreateRecipe = async () => {
     try {
       const { error } = await supabase.from('recipes').insert({
         name_en: recipeForm.name_en, name_am: recipeForm.name_am,
