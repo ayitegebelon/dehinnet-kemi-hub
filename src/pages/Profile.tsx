@@ -154,8 +154,8 @@ const Profile: React.FC = () => {
     }
   };
 
-  const memberSince = profile?.created_at
-    ? new Date(profile.created_at).toLocaleDateString(language === 'am' ? 'am-ET' : 'en-US', { year: 'numeric', month: 'long' })
+  const memberSince = (profile as any)?.created_at
+    ? new Date((profile as any).created_at).toLocaleDateString(language === 'am' ? 'am-ET' : 'en-US', { year: 'numeric', month: 'long' })
     : '';
 
   return (
