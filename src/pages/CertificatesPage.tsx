@@ -107,12 +107,13 @@ const CertificatesPage: React.FC = () => {
   };
 
   const downloadCertificate = async (cert: any) => {
-    // Fetch director signature
+    // Fetch director signature with cache-busting
     const { data: sigData } = supabase.storage.from('signatures').getPublicUrl('director-signature.png');
     let signatureImgUrl = '';
     try {
-      const res = await fetch(sigData.publicUrl, { method: 'HEAD' });
-      if (res.ok) signatureImgUrl = sigData.publicUrl;
+      const cacheBuster = `?t=${Date.now()}`;
+      const res = await fetch(sigData.publicUrl + cacheBuster, { method: 'HEAD' });
+      if (res.ok) signatureImgUrl = sigData.publicUrl + cacheBuster;
     } catch {}
 
     const grade = getGradeLabel(cert.quiz_average);
