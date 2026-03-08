@@ -108,7 +108,7 @@ const CertificatesPage: React.FC = () => {
 
   const downloadCertificate = (cert: any) => {
     const grade = getGradeLabel(cert.quiz_average);
-    const verifyUrl = `${window.location.origin}/verify/${cert.certificate_number}`;
+    
     const nameParts = cert.student_name.split(' ');
     const firstName = nameParts[0] || '';
     const fatherNamePart = nameParts.slice(1).join(' ') || '';
