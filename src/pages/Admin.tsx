@@ -148,6 +148,16 @@ const Admin: React.FC = () => {
   const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
   const [uploadingSignature, setUploadingSignature] = useState(false);
 
+  // User management state
+  const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
+  const [isUserDetailOpen, setIsUserDetailOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [viewingUser, setViewingUser] = useState<User | null>(null);
+  const [userForm, setUserForm] = useState({
+    full_name: '', father_name: '', phone: '', age: '', skill_level: 'beginner',
+    subscription_tier: 'free', safety_score: '100',
+  });
+
   const fetchSignature = async () => {
     const { data } = supabase.storage.from('signatures').getPublicUrl('director-signature.png');
     // Check if file exists
