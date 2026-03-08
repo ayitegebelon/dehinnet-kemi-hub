@@ -9,15 +9,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Globe, Menu } from 'lucide-react';
+import { Globe, Menu, LogOut } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import ThemeToggle from './ThemeToggle';
 import NotificationBell from '@/components/notifications/NotificationBell';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import logo from '@/assets/logo.png';
 
 const Header: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
-  const { user } = useAuth();
+  const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const languageOptions = [
     { code: 'am', label: 'አማ', name: 'Amharic' },
@@ -65,7 +67,7 @@ const Header: React.FC = () => {
               </DropdownMenuContent>
             </DropdownMenu>
 
-            {!user && (
+            {!user ? (
               <div className="flex items-center gap-1.5">
                 <Button variant="ghost" size="sm" asChild className="h-9">
                   <Link to="/login">{t('nav.login')}</Link>
@@ -74,6 +76,31 @@ const Header: React.FC = () => {
                   <Link to="/signup">{t('nav.signup')}</Link>
                 </Button>
               </div>
+            ) : (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="flex items-center gap-2 rounded-full hover:opacity-80 transition-opacity focus:outline-none">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || 'User'} />
+                      <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-xs font-medium">
+                        {profile?.full_name?.charAt(0) || 'U'}
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem onClick={() => navigate('/profile')} className="cursor-pointer">
+                    <span className="truncate">{profile?.full_name || 'Profile'}</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => navigate('/subscription')} className="cursor-pointer">
+                    {t('nav.subscription')}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => signOut()} className="cursor-pointer text-destructive focus:text-destructive">
+                    <LogOut className="h-4 w-4 mr-2" />
+                    {language === 'am' ? 'ውጣ' : 'Sign Out'}
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             )}
           </div>
         </div>

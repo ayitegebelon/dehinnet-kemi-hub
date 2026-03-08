@@ -48,6 +48,7 @@ import {
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import logo from '@/assets/logo.png';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 interface NavItem {
   path: string;
@@ -327,11 +328,12 @@ const AppSidebar: React.FC = () => {
       <SidebarFooter className="border-t border-sidebar-border p-3">
         {!collapsed ? (
           <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center flex-shrink-0">
-              <span className="text-primary-foreground text-xs font-medium">
+          <Avatar className="h-8 w-8 flex-shrink-0">
+              <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || 'User'} />
+              <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-xs font-medium">
                 {profile?.full_name?.charAt(0) || 'U'}
-              </span>
-            </div>
+              </AvatarFallback>
+            </Avatar>
             <div className="flex-1 min-w-0">
               <p className="text-xs font-medium truncate">{profile?.full_name || 'User'}</p>
               <p className="text-[10px] text-muted-foreground truncate">{user.email}</p>
