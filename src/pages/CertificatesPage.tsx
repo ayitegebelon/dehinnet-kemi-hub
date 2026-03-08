@@ -228,9 +228,10 @@ const CertificatesPage: React.FC = () => {
   .cert-id-value{font-family:'JetBrains Mono',monospace;font-size:8px;color:#999;margin-top:1mm;}
   .cert-date{font-family:'Inter',sans-serif;font-size:7px;color:#777;margin-top:1mm;}
   
-  .qr-area{position:absolute;bottom:8mm;right:20mm;z-index:12;text-align:center;}
-  .qr-img{width:14mm;height:14mm;border:1px solid #333;border-radius:2mm;background:#fff;padding:1mm;}
-  .qr-label{font-family:'Inter',sans-serif;font-size:5px;color:#555;letter-spacing:1px;text-transform:uppercase;margin-top:1mm;}
+  .verify-area{position:absolute;bottom:8mm;right:20mm;z-index:12;text-align:right;}
+  .verify-label{font-family:'Inter',sans-serif;font-size:6px;color:#555;letter-spacing:1px;text-transform:uppercase;}
+  .verify-value{font-family:'JetBrains Mono',monospace;font-size:8px;color:#999;margin-top:1mm;}
+  .verify-note{font-family:'Inter',sans-serif;font-size:5px;color:#555;margin-top:1mm;font-style:italic;}
 </style></head><body>
 <div class="cert-wrap">
   <div class="bg-pattern"></div>
