@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import Layout from '@/components/layout/Layout';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { CheckCircle2, XCircle, Search, GraduationCap, ArrowLeft, Shield, Calendar, Award, Hash } from 'lucide-react';
+import { CheckCircle2, XCircle, Search, GraduationCap, Shield, Calendar, Award, Hash } from 'lucide-react';
 
 const VerifyCertificatePage: React.FC = () => {
   const { certNumber } = useParams<{ certNumber?: string }>();
@@ -44,22 +45,8 @@ const VerifyCertificatePage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/30">
-      {/* Header */}
-      <header className="border-b border-border/50 bg-background/80 backdrop-blur-sm">
-        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
-            <ArrowLeft className="h-4 w-4" />
-            <span className="text-lg font-bold">🧪 Safety First Chemistry</span>
-          </Link>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <Shield className="h-4 w-4" />
-            <span className="text-sm font-medium">Certificate Verification</span>
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-4 py-12 max-w-2xl">
+    <Layout>
+      <div className="container mx-auto px-4 py-12 max-w-2xl">
         {/* Search */}
         <div className="text-center mb-10">
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 mb-4">
@@ -150,8 +137,8 @@ const VerifyCertificatePage: React.FC = () => {
             </Card>
           )
         )}
-      </main>
-    </div>
+      </div>
+    </Layout>
   );
 };
 
