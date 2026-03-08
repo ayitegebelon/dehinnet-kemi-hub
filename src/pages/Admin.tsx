@@ -315,7 +315,54 @@ const Admin: React.FC = () => {
     setIsUserDetailOpen(true);
   };
 
-  const handleCreateRecipe = async () => {
+  const handleSendNotification = async () => {
+    if (!notifForm.title_en || !notifForm.message_en || !notifForm.title_am || !notifForm.message_am) {
+      toast.error('Please fill in all title and message fields');
+      return;
+    }
+    if (notifTarget === 'specific' && notifSelectedUsers.length === 0) {
+      toast.error('Please select at least one user');
+      return;
+    }
+
+    setSendingNotif(true);
+    try {
+      const targetUsers = notifTarget === 'all' ? users : users.filter(u => notifSelectedUsers.includes(u.user_id));
+      const notifications = targetUsers.map(u => ({
+        user_id: u.user_id,
+        title_en: notifForm.title_en,
+        title_am: notifForm.title_am,
+        message_en: notifForm.message_en,
+        message_am: notifForm.message_am,
+        type: notifForm.type,
+        link: notifForm.link || null,
+      }));
+
+      // Insert in batches of 100
+      for (let i = 0; i < notifications.length; i += 100) {
+        const batch = notifications.slice(i, i + 100);
+        const { error } = await supabase.from('notifications').insert(batch);
+        if (error) throw error;
+      }
+
+      toast.success(`Notification sent to ${targetUsers.length} user(s)`);
+      setNotifForm({ title_en: '', title_am: '', message_en: '', message_am: '', type: 'info', link: '' });
+      setNotifSelectedUsers([]);
+    } catch (error) {
+      console.error('Error sending notification:', error);
+      toast.error('Failed to send notification');
+    } finally {
+      setSendingNotif(false);
+    }
+  };
+
+  const toggleUserSelection = (userId: string) => {
+    setNotifSelectedUsers(prev =>
+      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
+    );
+  };
+
+
     try {
       const { error } = await supabase.from('recipes').insert({
         name_en: recipeForm.name_en, name_am: recipeForm.name_am,
