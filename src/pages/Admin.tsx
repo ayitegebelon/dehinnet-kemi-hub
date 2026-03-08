@@ -564,9 +564,12 @@ const Admin: React.FC = () => {
           {/* Users Tab */}
           <TabsContent value="users">
             <Card>
-              <CardHeader>
-                <CardTitle>{t('admin.users')}</CardTitle>
-                <CardDescription>Manage platform users and their roles</CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>{t('admin.users')}</CardTitle>
+                  <CardDescription>Full user management — view, edit, change roles, and remove users</CardDescription>
+                </div>
+                <Badge variant="outline" className="text-sm">{filteredUsers.length} users</Badge>
               </CardHeader>
               <CardContent>
                 {loading ? (
@@ -576,20 +579,33 @@ const Admin: React.FC = () => {
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead>Name</TableHead>
+                          <TableHead>User</TableHead>
                           <TableHead>Email</TableHead>
+                          <TableHead>Phone</TableHead>
                           <TableHead>Level</TableHead>
                           <TableHead>Subscription</TableHead>
-                          <TableHead>Safety Score</TableHead>
-                          {isSuperAdmin && <TableHead>Actions</TableHead>}
+                          <TableHead>Safety</TableHead>
+                          <TableHead>Joined</TableHead>
+                          <TableHead>Actions</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {filteredUsers.map((u) => (
                           <TableRow key={u.id}>
-                            <TableCell className="font-medium">{u.full_name}</TableCell>
-                            <TableCell>{u.email}</TableCell>
-                            <TableCell><Badge variant="secondary">{u.skill_level}</Badge></TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary overflow-hidden">
+                                  {u.avatar_url ? <img src={u.avatar_url} className="w-full h-full object-cover" /> : u.full_name?.charAt(0)}
+                                </div>
+                                <div>
+                                  <p className="font-medium text-sm">{u.full_name}</p>
+                                  {u.father_name && <p className="text-xs text-muted-foreground">{u.father_name}</p>}
+                                </div>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-sm">{u.email}</TableCell>
+                            <TableCell className="text-sm">{u.phone || '-'}</TableCell>
+                            <TableCell><Badge variant="secondary" className="text-xs">{u.skill_level}</Badge></TableCell>
                             <TableCell>
                               <Badge className={
                                 u.subscription_tier === 'premium' ? 'bg-ethiopian-gold text-foreground' :
@@ -597,24 +613,40 @@ const Admin: React.FC = () => {
                               }>{u.subscription_tier}</Badge>
                             </TableCell>
                             <TableCell>
-                              <div className="flex items-center gap-2">
-                                <div className="w-16 h-2 bg-muted rounded-full overflow-hidden">
+                              <div className="flex items-center gap-1">
+                                <div className="w-12 h-2 bg-muted rounded-full overflow-hidden">
                                   <div className="h-full bg-primary transition-all" style={{ width: `${u.safety_score || 0}%` }} />
                                 </div>
-                                <span className="text-sm">{u.safety_score || 0}%</span>
+                                <span className="text-xs">{u.safety_score || 0}%</span>
                               </div>
                             </TableCell>
-                            {isSuperAdmin && (
-                              <TableCell>
-                                <Select defaultValue="user" onValueChange={(value) => handleUpdateUserRole(u.user_id, value as 'user' | 'admin')}>
-                                  <SelectTrigger className="w-24"><SelectValue /></SelectTrigger>
-                                  <SelectContent>
-                                    <SelectItem value="user">User</SelectItem>
-                                    <SelectItem value="admin">Admin</SelectItem>
-                                  </SelectContent>
-                                </Select>
-                              </TableCell>
-                            )}
+                            <TableCell className="text-xs text-muted-foreground">
+                              {new Date(u.created_at).toLocaleDateString()}
+                            </TableCell>
+                            <TableCell>
+                              <div className="flex items-center gap-1">
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openViewUser(u)} title="View">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => openEditUser(u)} title="Edit">
+                                  <Edit className="h-4 w-4" />
+                                </Button>
+                                {isSuperAdmin && (
+                                  <>
+                                    <Select defaultValue="user" onValueChange={(value) => handleUpdateUserRole(u.user_id, value as 'user' | 'admin')}>
+                                      <SelectTrigger className="w-20 h-8 text-xs"><SelectValue /></SelectTrigger>
+                                      <SelectContent>
+                                        <SelectItem value="user">User</SelectItem>
+                                        <SelectItem value="admin">Admin</SelectItem>
+                                      </SelectContent>
+                                    </Select>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive hover:text-destructive" onClick={() => handleDeleteUser(u)} title="Delete">
+                                      <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                  </>
+                                )}
+                              </div>
+                            </TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -623,6 +655,88 @@ const Admin: React.FC = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* User Edit Dialog */}
+            <Dialog open={isUserDialogOpen} onOpenChange={setIsUserDialogOpen}>
+              <DialogContent className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>Edit User: {editingUser?.full_name}</DialogTitle>
+                  <DialogDescription>Update user profile information</DialogDescription>
+                </DialogHeader>
+                <div className="grid gap-4 py-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2"><Label>Full Name</Label><Input value={userForm.full_name} onChange={(e) => setUserForm({...userForm, full_name: e.target.value})} /></div>
+                    <div className="space-y-2"><Label>Father's Name</Label><Input value={userForm.father_name} onChange={(e) => setUserForm({...userForm, father_name: e.target.value})} /></div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2"><Label>Phone</Label><Input value={userForm.phone} onChange={(e) => setUserForm({...userForm, phone: e.target.value})} /></div>
+                    <div className="space-y-2"><Label>Age</Label><Input type="number" value={userForm.age} onChange={(e) => setUserForm({...userForm, age: e.target.value})} /></div>
+                  </div>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div className="space-y-2"><Label>Skill Level</Label>
+                      <Select value={userForm.skill_level} onValueChange={(v) => setUserForm({...userForm, skill_level: v})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="beginner">Beginner</SelectItem>
+                          <SelectItem value="intermediate">Intermediate</SelectItem>
+                          <SelectItem value="advanced">Advanced</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2"><Label>Subscription</Label>
+                      <Select value={userForm.subscription_tier} onValueChange={(v) => setUserForm({...userForm, subscription_tier: v})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="free">Free</SelectItem>
+                          <SelectItem value="premium">Premium</SelectItem>
+                          <SelectItem value="institution">Institution</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2"><Label>Safety Score</Label><Input type="number" max={100} min={0} value={userForm.safety_score} onChange={(e) => setUserForm({...userForm, safety_score: e.target.value})} /></div>
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsUserDialogOpen(false)}>Cancel</Button>
+                  <Button onClick={handleSaveUser}>Save Changes</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+
+            {/* User Detail Dialog */}
+            <Dialog open={isUserDetailOpen} onOpenChange={setIsUserDetailOpen}>
+              <DialogContent className="max-w-lg">
+                <DialogHeader>
+                  <DialogTitle>User Details</DialogTitle>
+                </DialogHeader>
+                {viewingUser && (
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-4">
+                      <div className="w-16 h-16 rounded-full bg-primary/20 flex items-center justify-center text-2xl font-bold text-primary overflow-hidden">
+                        {viewingUser.avatar_url ? <img src={viewingUser.avatar_url} className="w-full h-full object-cover" /> : viewingUser.full_name?.charAt(0)}
+                      </div>
+                      <div>
+                        <h3 className="text-lg font-bold">{viewingUser.full_name}</h3>
+                        {viewingUser.father_name && <p className="text-sm text-muted-foreground">Father: {viewingUser.father_name}</p>}
+                        <p className="text-sm text-muted-foreground">{viewingUser.email}</p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-3 text-sm">
+                      <div className="p-3 bg-muted/50 rounded-lg"><span className="text-muted-foreground">Phone:</span> <span className="font-medium">{viewingUser.phone || 'N/A'}</span></div>
+                      <div className="p-3 bg-muted/50 rounded-lg"><span className="text-muted-foreground">Age:</span> <span className="font-medium">{viewingUser.age || 'N/A'}</span></div>
+                      <div className="p-3 bg-muted/50 rounded-lg"><span className="text-muted-foreground">Skill:</span> <Badge variant="secondary" className="ml-1">{viewingUser.skill_level}</Badge></div>
+                      <div className="p-3 bg-muted/50 rounded-lg"><span className="text-muted-foreground">Plan:</span> <Badge className="ml-1">{viewingUser.subscription_tier}</Badge></div>
+                      <div className="p-3 bg-muted/50 rounded-lg"><span className="text-muted-foreground">Safety:</span> <span className="font-medium">{viewingUser.safety_score}%</span></div>
+                      <div className="p-3 bg-muted/50 rounded-lg"><span className="text-muted-foreground">Joined:</span> <span className="font-medium">{new Date(viewingUser.created_at).toLocaleDateString()}</span></div>
+                    </div>
+                  </div>
+                )}
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsUserDetailOpen(false)}>Close</Button>
+                  {viewingUser && <Button onClick={() => { setIsUserDetailOpen(false); openEditUser(viewingUser); }}>Edit User</Button>}
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
           </TabsContent>
 
           {/* Recipes Tab */}
