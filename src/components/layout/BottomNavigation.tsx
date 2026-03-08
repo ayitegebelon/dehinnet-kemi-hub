@@ -11,6 +11,7 @@ import {
   FolderKanban
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 
 interface NavItem {
   to: string;
@@ -29,7 +30,7 @@ const navItems: NavItem[] = [
 
 const BottomNavigation: React.FC = () => {
   const { t } = useLanguage();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const location = useLocation();
 
   // Only show for authenticated users
@@ -74,6 +75,29 @@ const BottomNavigation: React.FC = () => {
             </Link>
           );
         })}
+        {/* Profile avatar link */}
+        <Link
+          to="/profile"
+          className={cn(
+            "flex flex-col items-center justify-center gap-0.5 px-2 py-1.5 rounded-xl transition-all duration-300 min-w-[56px]",
+            location.pathname === '/profile'
+              ? "text-primary bg-primary/10 scale-105"
+              : "text-muted-foreground hover:text-foreground hover:bg-muted/50"
+          )}
+        >
+          <Avatar className="h-6 w-6">
+            <AvatarImage src={profile?.avatar_url || undefined} alt={profile?.full_name || 'User'} />
+            <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-primary-foreground text-[9px] font-medium">
+              {profile?.full_name?.charAt(0) || 'U'}
+            </AvatarFallback>
+          </Avatar>
+          <span className={cn(
+            "text-[10px] font-medium truncate max-w-[56px] text-center leading-tight",
+            location.pathname === '/profile' && "font-semibold"
+          )}>
+            {t('nav.profile')}
+          </span>
+        </Link>
       </div>
     </nav>
   );
