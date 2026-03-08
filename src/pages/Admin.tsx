@@ -27,9 +27,14 @@ interface User {
   user_id: string;
   full_name: string;
   email: string;
+  phone: string | null;
+  age: number | null;
+  father_name: string | null;
   skill_level: string;
   subscription_tier: string;
+  subscription_expiry: string | null;
   safety_score: number;
+  avatar_url: string | null;
   created_at: string;
 }
 
