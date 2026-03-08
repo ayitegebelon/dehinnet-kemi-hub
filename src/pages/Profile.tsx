@@ -27,6 +27,7 @@ const Profile: React.FC = () => {
   const [uploading, setUploading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [realStats, setRealStats] = useState({ experiments: 0, certificates: 0, achievements: 0, completedLessons: 0 });
   const [formData, setFormData] = useState<{
     full_name: string;
     father_name: string;
@@ -50,6 +51,25 @@ const Profile: React.FC = () => {
       setAvatarUrl(profile.avatar_url);
     }
   }, [profile]);
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchRealStats = async () => {
+      const [expRes, certRes, achRes, lessonsRes] = await Promise.all([
+        supabase.from('experiments').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+        supabase.from('certificates').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+        supabase.from('achievements').select('id', { count: 'exact', head: true }).eq('user_id', user.id),
+        supabase.from('user_progress').select('id', { count: 'exact', head: true }).eq('user_id', user.id).eq('completed', true),
+      ]);
+      setRealStats({
+        experiments: expRes.count || 0,
+        certificates: certRes.count || 0,
+        achievements: achRes.count || 0,
+        completedLessons: lessonsRes.count || 0,
+      });
+    };
+    fetchRealStats();
+  }, [user]);
 
   const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -130,9 +150,9 @@ const Profile: React.FC = () => {
 
   const stats = [
     { icon: Shield, label: isAmharic ? 'የደህንነት ነጥብ' : 'Safety Score', value: `${profile?.safety_score || 100}%`, color: 'text-success' },
-    { icon: FlaskConical, label: isAmharic ? 'ሙከራዎች' : 'Experiments', value: '0', color: 'text-science' },
-    { icon: Award, label: isAmharic ? 'ምስክር ወረቀቶች' : 'Certifications', value: '0', color: 'text-ethiopian-gold' },
-    { icon: Trophy, label: isAmharic ? 'ስኬቶች' : 'Achievements', value: '0', color: 'text-primary' },
+    { icon: FlaskConical, label: isAmharic ? 'ሙከራዎች' : 'Experiments', value: String(realStats.experiments), color: 'text-science' },
+    { icon: Award, label: isAmharic ? 'ምስክር ወረቀቶች' : 'Certificates', value: String(realStats.certificates), color: 'text-ethiopian-gold' },
+    { icon: Trophy, label: isAmharic ? 'ስኬቶች' : 'Achievements', value: String(realStats.achievements), color: 'text-primary' },
   ];
 
   const getSubscriptionBadge = () => {
@@ -467,19 +487,33 @@ const Profile: React.FC = () => {
                         <FlaskConical className="w-4 h-4 text-science" />
                         {isAmharic ? 'ሙከራዎች ተጠናቀዋል' : 'Experiments Completed'}
                       </span>
-                      <span>0/10</span>
+                      <span>{realStats.experiments}</span>
                     </div>
-                    <Progress value={0} className="h-3" />
+                    <Progress value={Math.min(realStats.experiments * 10, 100)} className="h-3" />
                   </div>
 
-                  <div className="p-6 bg-muted/50 rounded-xl text-center border border-border/50">
-                    <Trophy className="w-12 h-12 mx-auto mb-3 text-ethiopian-gold" />
-                    <h4 className="font-semibold mb-1">
-                      {isAmharic ? 'ቀጣዩ ስኬት' : 'Next Achievement'}
-                    </h4>
-                    <p className="text-sm text-muted-foreground">
-                      {isAmharic ? 'የመጀመሪያ ሙከራዎን ያጠናቅቁ' : 'Complete your first experiment'}
-                    </p>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="font-medium flex items-center gap-2">
+                        <GraduationCap className="w-4 h-4 text-primary" />
+                        {isAmharic ? 'የተጠናቀቁ ትምህርቶች' : 'Lessons Completed'}
+                      </span>
+                      <span>{realStats.completedLessons}</span>
+                    </div>
+                    <Progress value={Math.min(realStats.completedLessons * 5, 100)} className="h-3" />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="p-4 bg-muted/50 rounded-xl text-center border border-border/50">
+                      <Award className="w-8 h-8 mx-auto mb-2 text-ethiopian-gold" />
+                      <p className="text-2xl font-bold">{realStats.certificates}</p>
+                      <p className="text-xs text-muted-foreground">{isAmharic ? 'ምስክር ወረቀቶች' : 'Certificates'}</p>
+                    </div>
+                    <div className="p-4 bg-muted/50 rounded-xl text-center border border-border/50">
+                      <Trophy className="w-8 h-8 mx-auto mb-2 text-primary" />
+                      <p className="text-2xl font-bold">{realStats.achievements}</p>
+                      <p className="text-xs text-muted-foreground">{isAmharic ? 'ስኬቶች' : 'Achievements'}</p>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
