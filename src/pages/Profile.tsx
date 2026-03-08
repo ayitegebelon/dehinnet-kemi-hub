@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import Layout from '@/components/layout/Layout';
@@ -10,24 +10,13 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
-  User,
-  Mail,
-  Phone,
-  Shield,
-  Award,
-  Crown,
-  Settings,
-  Edit,
-  Save,
-  X,
-  FlaskConical,
-  Star,
-  Trophy,
-  Target,
-  Calendar
+  User, Mail, Phone, Shield, Award, Crown, Settings, Edit, Save, X,
+  FlaskConical, Star, Trophy, Target, Calendar, Camera, Upload, MapPin,
+  GraduationCap, Clock, Zap
 } from 'lucide-react';
 
 const Profile: React.FC = () => {
@@ -35,6 +24,9 @@ const Profile: React.FC = () => {
   const { profile, user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState<{
     full_name: string;
     father_name: string;
@@ -52,6 +44,62 @@ const Profile: React.FC = () => {
   });
 
   const isAmharic = language === 'am';
+
+  useEffect(() => {
+    if (profile?.avatar_url) {
+      setAvatarUrl(profile.avatar_url);
+    }
+  }, [profile]);
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error(isAmharic ? 'እባክዎ ምስል ይምረጡ' : 'Please select an image file');
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error(isAmharic ? 'ፋይሉ ከ5MB መብለጥ የለበትም' : 'File must be less than 5MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/avatar.${fileExt}`;
+
+      // Remove old avatar if exists
+      await supabase.storage.from('avatars').remove([filePath]);
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const urlWithCacheBust = `${publicUrl}?t=${Date.now()}`;
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: urlWithCacheBust })
+        .eq('user_id', user.id);
+
+      if (updateError) throw updateError;
+
+      setAvatarUrl(urlWithCacheBust);
+      toast.success(isAmharic ? 'ፎቶ ተቀይሯል' : 'Profile photo updated');
+    } catch (error) {
+      console.error('Upload error:', error);
+      toast.error(isAmharic ? 'ፎቶ መስቀል አልተሳካም' : 'Failed to upload photo');
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const handleSave = async () => {
     setLoading(true);
@@ -98,39 +146,113 @@ const Profile: React.FC = () => {
     }
   };
 
+  const getSkillIcon = () => {
+    switch (profile?.skill_level) {
+      case 'advanced': return '🔬';
+      case 'intermediate': return '⚗️';
+      default: return '🧪';
+    }
+  };
+
+  const memberSince = profile?.created_at
+    ? new Date(profile.created_at).toLocaleDateString(language === 'am' ? 'am-ET' : 'en-US', { year: 'numeric', month: 'long' })
+    : '';
+
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          {/* Profile Header */}
-          <Card className="mb-8 overflow-hidden">
-            <div className="h-24 bg-gradient-to-r from-primary via-science to-accent" />
-            <CardContent className="relative pt-0">
-              <div className="flex flex-col md:flex-row md:items-end gap-4 -mt-12">
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-4xl font-bold text-white border-4 border-background shadow-lg">
-                  {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+          {/* Profile Header Card */}
+          <Card className="mb-8 overflow-hidden border-0 shadow-xl">
+            <div className="h-32 md:h-40 bg-gradient-to-r from-primary via-science to-accent relative">
+              <div className="absolute inset-0 bg-black/10" />
+              <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-card to-transparent" />
+            </div>
+            <CardContent className="relative pt-0 pb-6">
+              <div className="flex flex-col md:flex-row md:items-end gap-4 -mt-16 md:-mt-20">
+                {/* Avatar with upload */}
+                <div className="relative group">
+                  <div className="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-background shadow-xl overflow-hidden bg-gradient-to-br from-primary to-accent">
+                    {avatarUrl ? (
+                      <img
+                        src={avatarUrl}
+                        alt="Profile"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-5xl md:text-6xl font-bold text-white">
+                        {profile?.full_name?.charAt(0) || user?.email?.charAt(0) || 'U'}
+                      </div>
+                    )}
+                  </div>
+                  <button
+                    onClick={() => fileInputRef.current?.click()}
+                    disabled={uploading}
+                    className="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-primary text-primary-foreground flex items-center justify-center shadow-lg hover:scale-110 transition-transform cursor-pointer disabled:opacity-50"
+                  >
+                    {uploading ? (
+                      <Upload className="w-4 h-4 animate-pulse" />
+                    ) : (
+                      <Camera className="w-4 h-4" />
+                    )}
+                  </button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarUpload}
+                    className="hidden"
+                  />
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-1">
-                    <h1 className="text-2xl font-bold">{profile?.full_name || 'User'}</h1>
+
+                {/* Name & Info */}
+                <div className="flex-1 space-y-1">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <h1 className="text-2xl md:text-3xl font-bold">{profile?.full_name || 'User'}</h1>
                     {getSubscriptionBadge()}
                   </div>
-                  <p className="text-muted-foreground">{user?.email}</p>
+                  {(profile as any)?.father_name && (
+                    <p className="text-muted-foreground text-sm">
+                      {isAmharic ? 'የአባት ስም' : "Father's Name"}: {(profile as any).father_name}
+                    </p>
+                  )}
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap pt-1">
+                    <span className="flex items-center gap-1">
+                      <Mail className="w-3.5 h-3.5" /> {user?.email}
+                    </span>
+                    {profile?.phone && (
+                      <span className="flex items-center gap-1">
+                        <Phone className="w-3.5 h-3.5" /> {profile.phone}
+                      </span>
+                    )}
+                    {memberSince && (
+                      <span className="flex items-center gap-1">
+                        <Clock className="w-3.5 h-3.5" /> {isAmharic ? 'ከ' : 'Since'} {memberSince}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 pt-1">
+                    <Badge variant="outline" className="text-xs">
+                      {getSkillIcon()} {profile?.skill_level || 'beginner'}
+                    </Badge>
+                    {profile?.age && (
+                      <Badge variant="outline" className="text-xs">
+                        {profile.age} {isAmharic ? 'ዓመት' : 'yrs'}
+                      </Badge>
+                    )}
+                  </div>
                 </div>
+
+                {/* Edit button */}
                 <Button
                   variant={isEditing ? 'outline' : 'default'}
                   onClick={() => setIsEditing(!isEditing)}
+                  className="self-start md:self-auto"
                 >
                   {isEditing ? (
-                    <>
-                      <X className="w-4 h-4 mr-2" />
-                      {isAmharic ? 'ሰርዝ' : 'Cancel'}
-                    </>
+                    <><X className="w-4 h-4 mr-2" />{isAmharic ? 'ሰርዝ' : 'Cancel'}</>
                   ) : (
-                    <>
-                      <Edit className="w-4 h-4 mr-2" />
-                      {isAmharic ? 'አርትዕ' : 'Edit'}
-                    </>
+                    <><Edit className="w-4 h-4 mr-2" />{isAmharic ? 'አርትዕ' : 'Edit'}</>
                   )}
                 </Button>
               </div>
@@ -140,15 +262,15 @@ const Profile: React.FC = () => {
           {/* Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
             {stats.map((stat, i) => (
-              <Card key={i}>
+              <Card key={i} className="hover:shadow-md transition-shadow">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-3">
-                    <div className={`p-2 rounded-lg bg-muted ${stat.color}`}>
+                    <div className={`p-2.5 rounded-xl bg-muted ${stat.color}`}>
                       <stat.icon className="h-5 w-5" />
                     </div>
                     <div>
                       <p className="text-2xl font-bold">{stat.value}</p>
-                      <p className="text-sm text-muted-foreground">{stat.label}</p>
+                      <p className="text-xs text-muted-foreground">{stat.label}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -177,7 +299,10 @@ const Profile: React.FC = () => {
             <TabsContent value="info">
               <Card>
                 <CardHeader>
-                  <CardTitle>{isAmharic ? 'የግል መረጃ' : 'Personal Information'}</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <GraduationCap className="w-5 h-5 text-primary" />
+                    {isAmharic ? 'የግል መረጃ' : 'Personal Information'}
+                  </CardTitle>
                   <CardDescription>
                     {isAmharic ? 'የመገለጫዎን ዝርዝሮች ያስተዳድሩ' : 'Manage your profile details'}
                   </CardDescription>
@@ -193,9 +318,9 @@ const Profile: React.FC = () => {
                           onChange={(e) => setFormData({...formData, full_name: e.target.value})}
                         />
                       ) : (
-                        <div className="flex items-center gap-2 p-2 bg-muted rounded">
+                        <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border/50">
                           <User className="w-4 h-4 text-muted-foreground" />
-                          <span>{profile?.full_name || '-'}</span>
+                          <span className="font-medium">{profile?.full_name || '-'}</span>
                         </div>
                       )}
                     </div>
@@ -209,17 +334,17 @@ const Profile: React.FC = () => {
                           placeholder={isAmharic ? 'የአባት ስም' : "Father's name"}
                         />
                       ) : (
-                        <div className="flex items-center gap-2 p-2 bg-muted rounded">
+                        <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border/50">
                           <User className="w-4 h-4 text-muted-foreground" />
-                          <span>{(profile as any)?.father_name || '-'}</span>
+                          <span className="font-medium">{(profile as any)?.father_name || '-'}</span>
                         </div>
                       )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email">{t('auth.email')}</Label>
-                      <div className="flex items-center gap-2 p-2 bg-muted rounded">
+                      <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border/50">
                         <Mail className="w-4 h-4 text-muted-foreground" />
-                        <span>{user?.email || '-'}</span>
+                        <span className="font-medium">{user?.email || '-'}</span>
                       </div>
                     </div>
                     <div className="space-y-2">
@@ -232,9 +357,9 @@ const Profile: React.FC = () => {
                           placeholder="09XXXXXXXX"
                         />
                       ) : (
-                        <div className="flex items-center gap-2 p-2 bg-muted rounded">
+                        <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border/50">
                           <Phone className="w-4 h-4 text-muted-foreground" />
-                          <span>{profile?.phone || '-'}</span>
+                          <span className="font-medium">{profile?.phone || '-'}</span>
                         </div>
                       )}
                     </div>
@@ -248,9 +373,9 @@ const Profile: React.FC = () => {
                           onChange={(e) => setFormData({...formData, age: e.target.value})}
                         />
                       ) : (
-                        <div className="flex items-center gap-2 p-2 bg-muted rounded">
+                        <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border/50">
                           <Calendar className="w-4 h-4 text-muted-foreground" />
-                          <span>{profile?.age || '-'}</span>
+                          <span className="font-medium">{profile?.age || '-'}</span>
                         </div>
                       )}
                     </div>
@@ -271,24 +396,24 @@ const Profile: React.FC = () => {
                           </SelectContent>
                         </Select>
                       ) : (
-                        <div className="flex items-center gap-2 p-2 bg-muted rounded">
+                        <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border/50">
                           <Star className="w-4 h-4 text-muted-foreground" />
-                          <span className="capitalize">{profile?.skill_level || 'beginner'}</span>
+                          <span className="capitalize font-medium">{profile?.skill_level || 'beginner'}</span>
                         </div>
                       )}
                     </div>
                     <div className="space-y-2">
                       <Label>{isAmharic ? 'ምዝገባ' : 'Subscription'}</Label>
-                      <div className="flex items-center gap-2 p-2 bg-muted rounded">
+                      <div className="flex items-center gap-2 p-3 bg-muted/50 rounded-lg border border-border/50">
                         <Crown className="w-4 h-4 text-muted-foreground" />
-                        <span className="capitalize">{profile?.subscription_tier || 'free'}</span>
+                        <span className="capitalize font-medium">{profile?.subscription_tier || 'free'}</span>
                       </div>
                     </div>
                   </div>
 
                   {isEditing && (
-                    <div className="flex justify-end">
-                      <Button onClick={handleSave} disabled={loading}>
+                    <div className="flex justify-end pt-2">
+                      <Button onClick={handleSave} disabled={loading} size="lg">
                         <Save className="w-4 h-4 mr-2" />
                         {loading ? (isAmharic ? 'በማስቀመጥ ላይ...' : 'Saving...') : t('common.save')}
                       </Button>
@@ -302,13 +427,15 @@ const Profile: React.FC = () => {
             <TabsContent value="progress">
               <Card>
                 <CardHeader>
-                  <CardTitle>{isAmharic ? 'የእድገት ክትትል' : 'Progress Tracking'}</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Zap className="w-5 h-5 text-primary" />
+                    {isAmharic ? 'የእድገት ክትትል' : 'Progress Tracking'}
+                  </CardTitle>
                   <CardDescription>
                     {isAmharic ? 'የኬሚስትሪ ጉዞዎን ይመልከቱ' : 'View your chemistry journey'}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
-                  {/* Safety Progress */}
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="font-medium flex items-center gap-2">
@@ -320,7 +447,6 @@ const Profile: React.FC = () => {
                     <Progress value={profile?.safety_score || 100} className="h-3" />
                   </div>
 
-                  {/* Skill Progress */}
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="font-medium flex items-center gap-2">
@@ -335,7 +461,6 @@ const Profile: React.FC = () => {
                     />
                   </div>
 
-                  {/* Experiments Progress */}
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <span className="font-medium flex items-center gap-2">
@@ -347,9 +472,9 @@ const Profile: React.FC = () => {
                     <Progress value={0} className="h-3" />
                   </div>
 
-                  <div className="p-4 bg-muted/50 rounded-lg text-center">
-                    <Trophy className="w-12 h-12 mx-auto mb-2 text-ethiopian-gold" />
-                    <h4 className="font-medium mb-1">
+                  <div className="p-6 bg-muted/50 rounded-xl text-center border border-border/50">
+                    <Trophy className="w-12 h-12 mx-auto mb-3 text-ethiopian-gold" />
+                    <h4 className="font-semibold mb-1">
                       {isAmharic ? 'ቀጣዩ ስኬት' : 'Next Achievement'}
                     </h4>
                     <p className="text-sm text-muted-foreground">
@@ -364,7 +489,10 @@ const Profile: React.FC = () => {
             <TabsContent value="settings">
               <Card>
                 <CardHeader>
-                  <CardTitle>{isAmharic ? 'ቅንብሮች' : 'Settings'}</CardTitle>
+                  <CardTitle className="flex items-center gap-2">
+                    <Settings className="w-5 h-5 text-primary" />
+                    {isAmharic ? 'ቅንብሮች' : 'Settings'}
+                  </CardTitle>
                   <CardDescription>
                     {isAmharic ? 'የመተግበሪያ ቅንብሮችዎን ያስተዳድሩ' : 'Manage your app settings'}
                   </CardDescription>
@@ -387,12 +515,14 @@ const Profile: React.FC = () => {
                         </SelectContent>
                       </Select>
                     ) : (
-                      <div className="p-2 bg-muted rounded">
+                      <div className="p-3 bg-muted/50 rounded-lg border border-border/50 font-medium">
                         {profile?.preferred_language === 'am' ? 'አማርኛ' : 
                          profile?.preferred_language === 'or' ? 'Oromiffa' : 'English'}
                       </div>
                     )}
                   </div>
+
+                  <Separator />
 
                   <div className="p-4 border border-destructive/20 rounded-lg">
                     <h4 className="font-medium text-destructive mb-2">
