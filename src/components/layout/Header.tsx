@@ -9,15 +9,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Globe, Menu } from 'lucide-react';
+import { Globe, Menu, LogOut } from 'lucide-react';
 import { SidebarTrigger } from '@/components/ui/sidebar';
 import ThemeToggle from './ThemeToggle';
 import NotificationBell from '@/components/notifications/NotificationBell';
+import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import logo from '@/assets/logo.png';
 
 const Header: React.FC = () => {
   const { language, setLanguage, t } = useLanguage();
-  const { user } = useAuth();
+  const { user, profile, signOut } = useAuth();
+  const navigate = useNavigate();
 
   const languageOptions = [
     { code: 'am', label: 'አማ', name: 'Amharic' },
