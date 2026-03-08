@@ -19,7 +19,7 @@ import { toast } from 'sonner';
 import {
   Users, FlaskConical, BarChart3, Shield, Search, Plus, Edit, Trash2,
   Crown, TrendingUp, Activity, DollarSign, BookOpen, Video, HelpCircle,
-  AlertTriangle, Eye, Settings, Upload, Image
+  AlertTriangle, Eye, Settings, Upload, Image, Bell, Send, CheckCircle2
 } from 'lucide-react';
 
 interface User {
@@ -157,6 +157,14 @@ const Admin: React.FC = () => {
     full_name: '', father_name: '', phone: '', age: '', skill_level: 'beginner',
     subscription_tier: 'free', safety_score: '100',
   });
+
+  // Notification state
+  const [notifTarget, setNotifTarget] = useState<'all' | 'specific'>('all');
+  const [notifSelectedUsers, setNotifSelectedUsers] = useState<string[]>([]);
+  const [notifForm, setNotifForm] = useState({
+    title_en: '', title_am: '', message_en: '', message_am: '', type: 'info', link: '',
+  });
+  const [sendingNotif, setSendingNotif] = useState(false);
 
   const fetchSignature = async () => {
     const { data } = supabase.storage.from('signatures').getPublicUrl('director-signature.png');
@@ -305,6 +313,53 @@ const Admin: React.FC = () => {
   const openViewUser = (u: User) => {
     setViewingUser(u);
     setIsUserDetailOpen(true);
+  };
+
+  const handleSendNotification = async () => {
+    if (!notifForm.title_en || !notifForm.message_en || !notifForm.title_am || !notifForm.message_am) {
+      toast.error('Please fill in all title and message fields');
+      return;
+    }
+    if (notifTarget === 'specific' && notifSelectedUsers.length === 0) {
+      toast.error('Please select at least one user');
+      return;
+    }
+
+    setSendingNotif(true);
+    try {
+      const targetUsers = notifTarget === 'all' ? users : users.filter(u => notifSelectedUsers.includes(u.user_id));
+      const notifications = targetUsers.map(u => ({
+        user_id: u.user_id,
+        title_en: notifForm.title_en,
+        title_am: notifForm.title_am,
+        message_en: notifForm.message_en,
+        message_am: notifForm.message_am,
+        type: notifForm.type,
+        link: notifForm.link || null,
+      }));
+
+      // Insert in batches of 100
+      for (let i = 0; i < notifications.length; i += 100) {
+        const batch = notifications.slice(i, i + 100);
+        const { error } = await supabase.from('notifications').insert(batch);
+        if (error) throw error;
+      }
+
+      toast.success(`Notification sent to ${targetUsers.length} user(s)`);
+      setNotifForm({ title_en: '', title_am: '', message_en: '', message_am: '', type: 'info', link: '' });
+      setNotifSelectedUsers([]);
+    } catch (error) {
+      console.error('Error sending notification:', error);
+      toast.error('Failed to send notification');
+    } finally {
+      setSendingNotif(false);
+    }
+  };
+
+  const toggleUserSelection = (userId: string) => {
+    setNotifSelectedUsers(prev =>
+      prev.includes(userId) ? prev.filter(id => id !== userId) : [...prev, userId]
+    );
   };
 
   const handleCreateRecipe = async () => {
@@ -548,17 +603,18 @@ const Admin: React.FC = () => {
 
         {/* Tabs */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-          <TabsList className="grid w-full grid-cols-7 mb-6">
-            <TabsTrigger value="users" className="flex items-center gap-2"><Users className="h-4 w-4" />{t('admin.users')}</TabsTrigger>
-            <TabsTrigger value="recipes" className="flex items-center gap-2"><FlaskConical className="h-4 w-4" />{t('admin.recipes')}</TabsTrigger>
-            <TabsTrigger value="courses" className="flex items-center gap-2"><BookOpen className="h-4 w-4" />Courses</TabsTrigger>
-            <TabsTrigger value="quizzes" className="flex items-center gap-2"><HelpCircle className="h-4 w-4" />Quizzes</TabsTrigger>
-            <TabsTrigger value="integrity" className="flex items-center gap-2">
+          <TabsList className="grid w-full grid-cols-8 mb-6">
+            <TabsTrigger value="users" className="flex items-center gap-1 text-xs"><Users className="h-4 w-4" />{t('admin.users')}</TabsTrigger>
+            <TabsTrigger value="recipes" className="flex items-center gap-1 text-xs"><FlaskConical className="h-4 w-4" />{t('admin.recipes')}</TabsTrigger>
+            <TabsTrigger value="courses" className="flex items-center gap-1 text-xs"><BookOpen className="h-4 w-4" />Courses</TabsTrigger>
+            <TabsTrigger value="quizzes" className="flex items-center gap-1 text-xs"><HelpCircle className="h-4 w-4" />Quizzes</TabsTrigger>
+            <TabsTrigger value="notifications" className="flex items-center gap-1 text-xs"><Bell className="h-4 w-4" />Notify</TabsTrigger>
+            <TabsTrigger value="integrity" className="flex items-center gap-1 text-xs">
               <AlertTriangle className="h-4 w-4" />Integrity
               {flaggedAttempts.length > 0 && <Badge variant="destructive" className="text-[10px] px-1.5 py-0">{flaggedAttempts.length}</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="analytics" className="flex items-center gap-2"><BarChart3 className="h-4 w-4" />{t('admin.analytics')}</TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-2"><Settings className="h-4 w-4" />Settings</TabsTrigger>
+            <TabsTrigger value="analytics" className="flex items-center gap-1 text-xs"><BarChart3 className="h-4 w-4" />{t('admin.analytics')}</TabsTrigger>
+            <TabsTrigger value="settings" className="flex items-center gap-1 text-xs"><Settings className="h-4 w-4" />Settings</TabsTrigger>
           </TabsList>
 
           {/* Users Tab */}
@@ -1019,6 +1075,92 @@ const Admin: React.FC = () => {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+          </TabsContent>
+
+          {/* Notifications Tab */}
+          <TabsContent value="notifications">
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Bell className="h-5 w-5 text-primary" />Send Notifications</CardTitle>
+                <CardDescription>Send announcements to all users or specific individuals</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Target Selection */}
+                <div className="space-y-2">
+                  <Label className="text-sm font-medium">Send To</Label>
+                  <div className="flex gap-3">
+                    <Button variant={notifTarget === 'all' ? 'default' : 'outline'} onClick={() => setNotifTarget('all')} className="flex items-center gap-2">
+                      <Users className="h-4 w-4" />All Users ({users.length})
+                    </Button>
+                    <Button variant={notifTarget === 'specific' ? 'default' : 'outline'} onClick={() => setNotifTarget('specific')} className="flex items-center gap-2">
+                      <Eye className="h-4 w-4" />Specific Users
+                    </Button>
+                  </div>
+                </div>
+
+                {/* User selection for specific */}
+                {notifTarget === 'specific' && (
+                  <div className="space-y-2">
+                    <Label className="text-sm font-medium">Select Users ({notifSelectedUsers.length} selected)</Label>
+                    <div className="max-h-48 overflow-y-auto border rounded-lg p-2 space-y-1">
+                      {users.map(u => (
+                        <label key={u.user_id} className="flex items-center gap-3 p-2 rounded-md hover:bg-muted/50 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={notifSelectedUsers.includes(u.user_id)}
+                            onChange={() => toggleUserSelection(u.user_id)}
+                            className="rounded"
+                          />
+                          <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary">
+                            {u.full_name?.charAt(0)}
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-sm font-medium">{u.full_name}</p>
+                            <p className="text-xs text-muted-foreground">{u.email}</p>
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Notification Form */}
+                <div className="grid gap-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2"><Label>Title (English) *</Label><Input value={notifForm.title_en} onChange={(e) => setNotifForm({...notifForm, title_en: e.target.value})} placeholder="New course available!" /></div>
+                    <div className="space-y-2"><Label>Title (Amharic) *</Label><Input value={notifForm.title_am} onChange={(e) => setNotifForm({...notifForm, title_am: e.target.value})} placeholder="አዲስ ኮርስ ተገኝቷል!" /></div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2"><Label>Message (English) *</Label><Textarea value={notifForm.message_en} onChange={(e) => setNotifForm({...notifForm, message_en: e.target.value})} placeholder="We have exciting new content..." rows={3} /></div>
+                    <div className="space-y-2"><Label>Message (Amharic) *</Label><Textarea value={notifForm.message_am} onChange={(e) => setNotifForm({...notifForm, message_am: e.target.value})} placeholder="አዲስ ይዘት አለን..." rows={3} /></div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2"><Label>Type</Label>
+                      <Select value={notifForm.type} onValueChange={(v) => setNotifForm({...notifForm, type: v})}>
+                        <SelectTrigger><SelectValue /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="info">ℹ️ Info</SelectItem>
+                          <SelectItem value="success">✅ Success</SelectItem>
+                          <SelectItem value="warning">⚠️ Warning</SelectItem>
+                          <SelectItem value="announcement">📢 Announcement</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <div className="space-y-2"><Label>Link (optional)</Label><Input value={notifForm.link} onChange={(e) => setNotifForm({...notifForm, link: e.target.value})} placeholder="/learn or /dashboard" /></div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end pt-2">
+                  <Button onClick={handleSendNotification} disabled={sendingNotif} size="lg" className="flex items-center gap-2">
+                    {sendingNotif ? (
+                      <><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-primary-foreground" /> Sending...</>
+                    ) : (
+                      <><Send className="h-4 w-4" /> Send Notification</>
+                    )}
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Integrity / Flagged Attempts Tab */}
