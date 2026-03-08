@@ -258,8 +258,7 @@ const CertificatesPage: React.FC = () => {
     
     <div class="presented-to">Proudly Presented To</div>
     
-    <div class="student-name">${firstName}</div>
-    ${fatherNamePart ? `<div class="student-father">${fatherNamePart}</div>` : ''}
+     <div class="student-name">${cert.student_name}</div>
     <div class="name-underline"></div>
     
     <div class="desc-text">For successfully completing the course</div>
