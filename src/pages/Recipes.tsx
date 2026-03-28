@@ -158,7 +158,16 @@ const Recipes: React.FC = () => {
   };
 
   const handleStartExperiment = () => {
-    navigate('/safety');
+    if (selectedRecipe) {
+      // Store recipe context for safety checklist, then navigate
+      sessionStorage.setItem('projectStartContext', JSON.stringify({
+        projectId: selectedRecipe.id,
+        projectTitle: isAmharic ? selectedRecipe.name_am : selectedRecipe.name_en,
+      }));
+      setIsDetailOpen(false);
+      setSelectedRecipe(null);
+      navigate('/safety');
+    }
   };
 
   const filteredRecipes = recipes.filter(recipe => {
