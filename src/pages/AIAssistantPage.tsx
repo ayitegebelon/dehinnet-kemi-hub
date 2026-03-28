@@ -109,7 +109,8 @@ IMPORTANT: Do NOT use markdown formatting like ** for bold, ## for headers, or *
         </div>
 
         <Card className="h-[calc(100vh-280px)] flex flex-col">
-          <ScrollArea className="flex-1 p-4" ref={scrollRef}>
+          <ScrollArea className="flex-1 p-4">
+            <div ref={scrollRef}>
             {messages.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full py-12 space-y-6">
                 <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center">
@@ -176,6 +177,7 @@ IMPORTANT: Do NOT use markdown formatting like ** for bold, ## for headers, or *
                 )}
               </div>
             )}
+            </div>
           </ScrollArea>
 
           <div className="border-t p-4">
