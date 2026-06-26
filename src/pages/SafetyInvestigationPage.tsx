@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +9,7 @@ import {
   Sparkles, FlaskConical, ShieldAlert, Wind, ShieldCheck, Brain, FileText,
   Loader2, History, Search, Download, Beaker, Zap, AlertTriangle, CheckCircle2, Play,
 } from 'lucide-react';
-import DashboardLayout from '@/components/layout/DashboardLayout';
+import Layout from '@/components/layout/Layout';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
