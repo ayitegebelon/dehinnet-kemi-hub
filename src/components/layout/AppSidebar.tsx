@@ -36,6 +36,13 @@ const AppSidebar: React.FC = () => {
       items: [{ path: '/dashboard', label: t('nav.dashboard'), icon: LayoutDashboard }],
     },
     {
+      label: isAm ? 'ራስ-ገዝ ስርዓት' : 'Autonomous System',
+      icon: Zap,
+      items: [
+        { path: '/investigation', label: isAm ? 'ሙሉ የደህንነት ምርመራ' : 'Full Safety Investigation', icon: Zap },
+      ],
+    },
+    {
       label: isAm ? 'AI ደህንነት' : 'AI Safety',
       icon: Sparkles,
       items: [

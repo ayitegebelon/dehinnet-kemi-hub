@@ -88,6 +88,42 @@ export type Database = {
           },
         ]
       }
+      chemical_memory: {
+        Row: {
+          ai_summary: string | null
+          analysis_result: string | null
+          chemical_name: string
+          created_at: string
+          id: string
+          risk_level: string | null
+          safety_notes: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          ai_summary?: string | null
+          analysis_result?: string | null
+          chemical_name: string
+          created_at?: string
+          id?: string
+          risk_level?: string | null
+          safety_notes?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          ai_summary?: string | null
+          analysis_result?: string | null
+          chemical_name?: string
+          created_at?: string
+          id?: string
+          risk_level?: string | null
+          safety_notes?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       courses: {
         Row: {
           category: string
