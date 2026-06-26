@@ -299,7 +299,7 @@ const SafetyInvestigationPage: React.FC = () => {
             {/* Report */}
             
               {report && (
-                <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
+                <div>
                   <Card className="p-5 space-y-4">
                     <div className="flex items-center justify-between flex-wrap gap-2">
                       <h2 className="text-lg font-bold flex items-center gap-2"><FileText className="h-5 w-5" /> Chemical Safety Report</h2>
@@ -329,7 +329,7 @@ const SafetyInvestigationPage: React.FC = () => {
                       <p className="text-sm opacity-95">{report.summary}</p>
                     </div>
                   </Card>
-                </motion.div>
+                </div>
               )}
             
           </div>
