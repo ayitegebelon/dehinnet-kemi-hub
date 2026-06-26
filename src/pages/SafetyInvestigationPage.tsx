@@ -211,7 +211,7 @@ const SafetyInvestigationPage: React.FC = () => {
   };
 
   return (
-    <DashboardLayout>
+    <Layout>
       <div className="p-4 md:p-6 space-y-4">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
           <div>
@@ -297,7 +297,7 @@ const SafetyInvestigationPage: React.FC = () => {
             )}
 
             {/* Report */}
-            <AnimatePresence>
+            
               {report && (
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }}>
                   <Card className="p-5 space-y-4">
@@ -331,7 +331,7 @@ const SafetyInvestigationPage: React.FC = () => {
                   </Card>
                 </motion.div>
               )}
-            </AnimatePresence>
+            
           </div>
 
           {/* RIGHT — memory panel */}
@@ -368,7 +368,7 @@ const SafetyInvestigationPage: React.FC = () => {
           </div>
         </div>
       </div>
-    </DashboardLayout>
+    </Layout>
   );
 };
 
