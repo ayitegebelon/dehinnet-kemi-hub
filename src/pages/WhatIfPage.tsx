@@ -65,7 +65,10 @@ const WhatIfPage: React.FC = () => {
         </div>
 
         <SafetyDisclaimer context="mixing" />
+
+        <Card className="p-6 mb-6">
           <Label className="text-sm font-semibold mb-3 block">
+
             {isAm ? 'የሚቀላቀሉ ኬሚካሎች' : 'Chemicals to mix'}
           </Label>
           <div className="space-y-2">
