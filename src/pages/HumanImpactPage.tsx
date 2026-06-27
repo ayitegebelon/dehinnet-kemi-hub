@@ -20,6 +20,20 @@ const HumanImpactPage: React.FC = () => {
   const { loading, reply, ask } = useAiSafety();
   const [instant, setInstant] = useState<string | null>(null);
 
+  const severity = useMemo<'low' | 'moderate' | 'high' | 'extreme'>(() => {
+    const text = (reply || '').toUpperCase();
+    if (text.includes('EXTREME')) return 'extreme';
+    if (text.includes('HIGH')) return 'high';
+    if (text.includes('MODERATE')) return 'moderate';
+    if (text.includes('LOW') || text.includes('SAFE')) return 'low';
+    // Fall back to chemical hazard data
+    const entry = findChemical(chemical);
+    if (entry?.hazardLevel === 'extreme') return 'extreme';
+    if (entry?.hazardLevel === 'high') return 'high';
+    if (entry?.hazardLevel === 'moderate') return 'moderate';
+    return 'high';
+  }, [reply, chemical]);
+
   const handleAnalyse = async () => {
     if (!chemical.trim()) return;
     const entry = findChemical(chemical);
