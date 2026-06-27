@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import Layout from '@/components/layout/Layout';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,6 +10,7 @@ import { useAiSafety } from '@/hooks/useAiSafety';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { findChemical } from '@/data/chemicalsDatabase';
 import AiResultCard from '@/components/safety/AiResultCard';
+import HumanBodyDiagram from '@/components/safety/HumanBodyDiagram';
 
 const HumanImpactPage: React.FC = () => {
   const { language } = useLanguage();
