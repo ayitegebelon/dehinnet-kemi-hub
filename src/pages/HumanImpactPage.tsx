@@ -70,7 +70,10 @@ const HumanImpactPage: React.FC = () => {
           </div>
         </div>
 
+        <SafetyDisclaimer context="exposure" />
+
         <div className="grid lg:grid-cols-2 gap-6">
+
           <div className="space-y-4">
             <Card className="p-6 space-y-4">
               <div>
