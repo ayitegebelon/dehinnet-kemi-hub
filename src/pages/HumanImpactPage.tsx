@@ -10,6 +10,7 @@ import { useAiSafety } from '@/hooks/useAiSafety';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { findChemical } from '@/data/chemicalsDatabase';
 import AiResultCard from '@/components/safety/AiResultCard';
+import SafetyDisclaimer from '@/components/safety/SafetyDisclaimer';
 import HumanBodyDiagram from '@/components/safety/HumanBodyDiagram';
 
 const HumanImpactPage: React.FC = () => {

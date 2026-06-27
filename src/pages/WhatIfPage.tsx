@@ -9,6 +9,7 @@ import { useAiSafety } from '@/hooks/useAiSafety';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { findChemical, checkCompatibility } from '@/data/chemicalsDatabase';
 import AiResultCard from '@/components/safety/AiResultCard';
+import SafetyDisclaimer from '@/components/safety/SafetyDisclaimer';
 
 const WhatIfPage: React.FC = () => {
   const { language } = useLanguage();
