@@ -733,6 +733,45 @@ export type Database = {
         }
         Relationships: []
       }
+      safety_analyses: {
+        Row: {
+          analysis_type: string
+          created_at: string
+          danger_level: string | null
+          id: string
+          inputs: Json
+          raw_reply: string | null
+          structured: Json | null
+          summary: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          analysis_type: string
+          created_at?: string
+          danger_level?: string | null
+          id?: string
+          inputs?: Json
+          raw_reply?: string | null
+          structured?: Json | null
+          summary?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          analysis_type?: string
+          created_at?: string
+          danger_level?: string | null
+          id?: string
+          inputs?: Json
+          raw_reply?: string | null
+          structured?: Json | null
+          summary?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       safety_certifications: {
         Row: {
           certification_type: string
