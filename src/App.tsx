@@ -32,6 +32,7 @@ import EmergencyResponsePage from "./pages/EmergencyResponsePage";
 import LabSafetyScorePage from "./pages/LabSafetyScorePage";
 import ChemicalDatabasePage from "./pages/ChemicalDatabasePage";
 import SafetyInvestigationPage from "./pages/SafetyInvestigationPage";
+import SafetyHistoryPage from "./pages/SafetyHistoryPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -82,6 +83,7 @@ const AppRoutes = () => (
     <Route path="/lab-safety-score" element={<ProtectedRoute><LabSafetyScorePage /></ProtectedRoute>} />
     <Route path="/chemicals" element={<ProtectedRoute><ChemicalDatabasePage /></ProtectedRoute>} />
     <Route path="/investigation" element={<ProtectedRoute><SafetyInvestigationPage /></ProtectedRoute>} />
+    <Route path="/safety-history" element={<ProtectedRoute><SafetyHistoryPage /></ProtectedRoute>} />
     <Route path="/autonomous" element={<Navigate to="/investigation" replace />} />
     {/* Redirect removed routes */}
     <Route path="/learn/*" element={<Navigate to="/dashboard" replace />} />
