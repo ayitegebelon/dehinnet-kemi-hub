@@ -6,7 +6,7 @@ import {
   LayoutDashboard, FlaskConical, Atom, Calculator, Shield, FolderKanban,
   User, Settings, LogOut, Bell, Bot, BookOpen, Blocks, Zap, Timer,
   Beaker, Wrench, ChevronDown, Search, Sparkles, HeartPulse, Wand2,
-  Wind, ScanLine, ShieldAlert, Siren, Gauge, Database,
+  Wind, ScanLine, ShieldAlert, Siren, Gauge, Database, History,
 } from 'lucide-react';
 import {
   Sidebar, SidebarContent, SidebarGroup, SidebarGroupLabel, SidebarGroupContent,
@@ -40,6 +40,7 @@ const AppSidebar: React.FC = () => {
       icon: Zap,
       items: [
         { path: '/investigation', label: isAm ? 'ሙሉ የደህንነት ምርመራ' : 'Full Safety Investigation', icon: Zap },
+        { path: '/safety-history', label: isAm ? 'የእኔ ምርመራዎች' : 'My Safety History', icon: History },
       ],
     },
     {

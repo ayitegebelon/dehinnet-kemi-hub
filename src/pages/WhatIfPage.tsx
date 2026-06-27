@@ -9,6 +9,7 @@ import { useAiSafety } from '@/hooks/useAiSafety';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { findChemical, checkCompatibility } from '@/data/chemicalsDatabase';
 import AiResultCard from '@/components/safety/AiResultCard';
+import SafetyDisclaimer from '@/components/safety/SafetyDisclaimer';
 
 const WhatIfPage: React.FC = () => {
   const { language } = useLanguage();
@@ -63,8 +64,11 @@ const WhatIfPage: React.FC = () => {
           </div>
         </div>
 
+        <SafetyDisclaimer context="mixing" />
+
         <Card className="p-6 mb-6">
           <Label className="text-sm font-semibold mb-3 block">
+
             {isAm ? 'የሚቀላቀሉ ኬሚካሎች' : 'Chemicals to mix'}
           </Label>
           <div className="space-y-2">

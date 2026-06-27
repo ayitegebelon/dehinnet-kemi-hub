@@ -10,6 +10,7 @@ import { useAiSafety } from '@/hooks/useAiSafety';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { findChemical } from '@/data/chemicalsDatabase';
 import AiResultCard from '@/components/safety/AiResultCard';
+import SafetyDisclaimer from '@/components/safety/SafetyDisclaimer';
 import HumanBodyDiagram from '@/components/safety/HumanBodyDiagram';
 
 const HumanImpactPage: React.FC = () => {
@@ -69,7 +70,10 @@ const HumanImpactPage: React.FC = () => {
           </div>
         </div>
 
+        <SafetyDisclaimer context="exposure" />
+
         <div className="grid lg:grid-cols-2 gap-6">
+
           <div className="space-y-4">
             <Card className="p-6 space-y-4">
               <div>
