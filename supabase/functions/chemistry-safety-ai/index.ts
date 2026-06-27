@@ -272,19 +272,147 @@ LIMITATIONS:
   }
 }
 
+const VALID_MODES: Mode[] = [
+  "what_if", "human_impact", "simplify", "environment",
+  "label", "risk_engine", "emergency", "lab_score", "alternative",
+];
+const VALID_LANGS = ["en", "am", "or"];
+const MAX_STR = 500;
+const MAX_LIST = 12;
+
+function validateBody(body: unknown): { ok: true; value: Body } | { ok: false; error: string } {
+  if (!body || typeof body !== "object") return { ok: false, error: "Body must be JSON" };
+  const b = body as Record<string, unknown>;
+  if (typeof b.mode !== "string" || !VALID_MODES.includes(b.mode as Mode))
+    return { ok: false, error: `mode must be one of: ${VALID_MODES.join(", ")}` };
+  if (!b.payload || typeof b.payload !== "object" || Array.isArray(b.payload))
+    return { ok: false, error: "payload must be an object" };
+  if (b.language !== undefined && (typeof b.language !== "string" || !VALID_LANGS.includes(b.language)))
+    return { ok: false, error: "language must be en, am, or or" };
+
+  const p = b.payload as Record<string, unknown>;
+  const mode = b.mode as Mode;
+
+  const checkStr = (v: unknown, name: string, required = true) => {
+    if (v === undefined || v === null || v === "") {
+      if (required) return `${name} is required`;
+      return null;
+    }
+    if (typeof v !== "string") return `${name} must be a string`;
+    if (v.length > MAX_STR) return `${name} exceeds ${MAX_STR} characters`;
+    return null;
+  };
+  const checkList = (v: unknown, name: string, min = 1) => {
+    if (!Array.isArray(v)) return `${name} must be a list`;
+    if (v.length < min) return `${name} needs at least ${min} item(s)`;
+    if (v.length > MAX_LIST) return `${name} exceeds ${MAX_LIST} items`;
+    for (const item of v) {
+      if (typeof item !== "string" || item.length === 0) return `${name} items must be non-empty strings`;
+      if (item.length > MAX_STR) return `${name} item exceeds ${MAX_STR} characters`;
+    }
+    return null;
+  };
+
+  let err: string | null = null;
+  switch (mode) {
+    case "what_if":
+    case "risk_engine":
+      err = checkList(p.chemicals, "chemicals", mode === "what_if" ? 2 : 1);
+      break;
+    case "human_impact":
+      err = checkStr(p.chemical, "chemical") || checkStr(p.route, "route");
+      if (!err && !["skin", "eyes", "inhalation", "ingestion"].includes(p.route as string))
+        err = "route must be skin, eyes, inhalation, or ingestion";
+      break;
+    case "simplify":
+      err = checkStr(p.text, "text");
+      break;
+    case "environment":
+      err = checkStr(p.chemical, "chemical") || checkStr(p.roomSize, "roomSize")
+        || checkStr(p.ventilation, "ventilation");
+      if (!err && typeof p.temperature !== "number") err = "temperature must be a number";
+      break;
+    case "label":
+      err = checkStr(p.labelText, "labelText");
+      break;
+    case "emergency":
+      err = checkStr(p.incident, "incident");
+      break;
+    case "lab_score":
+      err = checkList(p.inventory, "inventory", 0) || checkStr(p.ventilation, "ventilation")
+        || checkList(p.ppe, "ppe", 0) || checkStr(p.storage, "storage", false);
+      break;
+    case "alternative":
+      err = checkStr(p.chemical, "chemical") || checkStr(p.purpose, "purpose");
+      break;
+  }
+  if (err) return { ok: false, error: err };
+  return { ok: true, value: { mode, payload: p, language: (b.language as Body["language"]) || "en" } };
+}
+
+const DANGER_LEVELS = ["SAFE", "LOW", "MODERATE", "HIGH", "EXTREME"];
+
+function section(reply: string, header: string): string | null {
+  const re = new RegExp(`${header}\\s*:?\\s*\\n([\\s\\S]*?)(?=\\n[A-Z][A-Z 0-9/\\(\\)]{2,}:|$)`, "i");
+  const m = reply.match(re);
+  return m ? m[1].trim() : null;
+}
+function listItems(block: string | null): string[] {
+  if (!block) return [];
+  return block.split("\n").map((l) => l.replace(/^[-*\d.\)\s]+/, "").trim()).filter(Boolean);
+}
+function extractStructured(mode: Mode, reply: string): Record<string, unknown> | null {
+  if (mode === "what_if") {
+    const dangerRaw = (section(reply, "DANGER LEVEL") || "").toUpperCase();
+    const danger = DANGER_LEVELS.find((d) => dangerRaw.includes(d)) || null;
+    return {
+      reactionType: section(reply, "REACTION TYPE"),
+      dangerLevel: danger,
+      summary: section(reply, "WHAT HAPPENS"),
+      risks: listItems(section(reply, "IMMEDIATE RISKS")),
+      saferAlternative: section(reply, "SAFER ALTERNATIVE"),
+    };
+  }
+  if (mode === "human_impact") {
+    return {
+      bodyEffect: section(reply, "WHAT HAPPENS TO THE BODY"),
+      timeline: listItems(section(reply, "TIMELINE")),
+      immediateActions: listItems(section(reply, "IMMEDIATE ACTIONS")),
+      callAmbulanceIf: section(reply, "WHEN TO CALL 907"),
+    };
+  }
+  if (mode === "risk_engine") {
+    const dangerRaw = (section(reply, "RISK LEVEL") || "").toUpperCase();
+    const danger = DANGER_LEVELS.find((d) => dangerRaw.includes(d)) || null;
+    return {
+      dangerLevel: danger,
+      dangerousCombinations: section(reply, "DANGEROUS COMBINATIONS"),
+      safeHandling: listItems(section(reply, "SAFE HANDLING")),
+      ppe: listItems(section(reply, "REQUIRED PPE")),
+    };
+  }
+  return null;
+}
+
 serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
-    const body = (await req.json()) as Body;
-    if (!body.mode || !body.payload) {
-      return new Response(JSON.stringify({ error: "mode and payload are required" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
+    let raw: unknown;
+    try { raw = await req.json(); } catch {
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+    const validated = validateBody(raw);
+    if (!validated.ok) {
+      return new Response(JSON.stringify({ error: validated.error }), {
+        status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const body = validated.value;
 
     const apiKey = Deno.env.get("LOVABLE_API_KEY");
     if (!apiKey) {
@@ -337,10 +465,10 @@ serve(async (req) => {
 
     const data = await response.json();
     let reply: string = data.choices?.[0]?.message?.content || "No response.";
-    // Strip markdown defensively
     reply = reply.replace(/\*\*/g, "").replace(/(?<!\w)\*(?!\w)/g, "").replace(/^#{1,6}\s/gm, "");
+    const structured = extractStructured(body.mode, reply);
 
-    return new Response(JSON.stringify({ reply }), {
+    return new Response(JSON.stringify({ reply, structured }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
