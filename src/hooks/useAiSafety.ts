@@ -57,15 +57,15 @@ export function useAiSafety() {
               (result.structured?.summary as string | undefined) ||
               (result.structured?.bodyEffect as string | undefined) ||
               result.reply.slice(0, 240);
-            await supabase.from('safety_analyses').insert({
+            await supabase.from('safety_analyses').insert([{
               user_id: uid,
               analysis_type: mode,
-              inputs: payload,
+              inputs: payload as never,
               summary,
               danger_level: danger,
-              structured: result.structured,
+              structured: (result.structured ?? null) as never,
               raw_reply: result.reply,
-            });
+            }]);
           }
         }
 
