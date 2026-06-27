@@ -28,9 +28,12 @@ const HumanImpactPage: React.FC = () => {
     if (text.includes('LOW') || text.includes('SAFE')) return 'low';
     // Fall back to chemical hazard data
     const entry = findChemical(chemical);
-    if (entry?.hazardLevel === 'extreme') return 'extreme';
-    if (entry?.hazardLevel === 'high') return 'high';
-    if (entry?.hazardLevel === 'moderate') return 'moderate';
+    if (entry) {
+      if (['corrosive', 'toxic', 'reactive'].includes(entry.hazardClass)) return 'extreme';
+      if (['flammable', 'oxidizer'].includes(entry.hazardClass)) return 'high';
+      if (entry.hazardClass === 'irritant') return 'moderate';
+      if (entry.hazardClass === 'safe') return 'low';
+    }
     return 'high';
   }, [reply, chemical]);
 
