@@ -37,8 +37,8 @@ const Header: React.FC = () => {
           <div className="flex items-center gap-2">
             {user && <SidebarTrigger className="-ml-1" />}
             <Link to="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-              <img src={logo} alt="ደህንነት ኬሚ" className="h-8 w-8 rounded-lg object-contain" />
-              <span className="font-bold text-foreground font-amharic hidden sm:inline">ደህንነት ኬሚ</span>
+              <img src={logo} alt="Dehinnet Kemi AI" className="h-8 w-8 rounded-lg object-contain" />
+              <span className="font-bold text-foreground hidden sm:inline">Dehinnet Kemi <span className="text-primary">AI</span></span>
             </Link>
           </div>
 
