@@ -28,6 +28,9 @@ const Profile: React.FC = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [realStats, setRealStats] = useState({ experiments: 0, certificates: 0, achievements: 0, completedLessons: 0 });
+  const [pwd, setPwd] = useState({ current: '', next: '', confirm: '' });
+  const [showPwd, setShowPwd] = useState({ current: false, next: false, confirm: false });
+  const [changingPwd, setChangingPwd] = useState(false);
   const [formData, setFormData] = useState<{
     full_name: string;
     father_name: string;
