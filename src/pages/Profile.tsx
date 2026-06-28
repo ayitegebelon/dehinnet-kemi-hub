@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 import {
   User, Mail, Phone, Shield, Award, Crown, Settings, Edit, Save, X,
   FlaskConical, Star, Trophy, Target, Calendar, Camera, Upload, MapPin,
-  GraduationCap, Clock, Zap
+  GraduationCap, Clock, Zap, Lock, Eye, EyeOff, KeyRound
 } from 'lucide-react';
 
 const Profile: React.FC = () => {
