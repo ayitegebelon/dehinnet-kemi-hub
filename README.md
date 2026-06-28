@@ -45,7 +45,6 @@ With one click, the system automatically:
 <div align="center">
   <img src="architecture_diagram_dehinnet_kemi_ai.png" width="900"/>
 </div>
-```text
 User
    ↓
 Frontend Application
