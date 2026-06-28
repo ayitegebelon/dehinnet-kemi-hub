@@ -151,6 +151,42 @@ const Profile: React.FC = () => {
     }
   };
 
+  const handleChangePassword = async () => {
+    if (!user?.email) return;
+    if (pwd.next.length < 8) {
+      toast.error(isAmharic ? 'የይለፍ ቃል ቢያንስ 8 ቁምፊዎች መሆን አለበት' : 'Password must be at least 8 characters');
+      return;
+    }
+    if (pwd.next !== pwd.confirm) {
+      toast.error(isAmharic ? 'የይለፍ ቃሎች አይዛመዱም' : 'Passwords do not match');
+      return;
+    }
+    if (pwd.next === pwd.current) {
+      toast.error(isAmharic ? 'አዲሱ የይለፍ ቃል ከአሮጌው የተለየ መሆን አለበት' : 'New password must differ from the current one');
+      return;
+    }
+    setChangingPwd(true);
+    try {
+      const { error: reauthError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: pwd.current,
+      });
+      if (reauthError) {
+        toast.error(isAmharic ? 'የአሁኑ የይለፍ ቃል ትክክል አይደለም' : 'Current password is incorrect');
+        return;
+      }
+      const { error } = await supabase.auth.updateUser({ password: pwd.next });
+      if (error) throw error;
+      toast.success(isAmharic ? 'የይለፍ ቃል ተቀይሯል' : 'Password updated successfully');
+      setPwd({ current: '', next: '', confirm: '' });
+    } catch (err) {
+      console.error('Password change error:', err);
+      toast.error(isAmharic ? 'የይለፍ ቃል መቀየር አልተሳካም' : 'Failed to update password');
+    } finally {
+      setChangingPwd(false);
+    }
+  };
+
   const stats = [
     { icon: Shield, label: isAmharic ? 'የደህንነት ነጥብ' : 'Safety Score', value: `${profile?.safety_score || 100}%`, color: 'text-success' },
     { icon: FlaskConical, label: isAmharic ? 'ሙከራዎች' : 'Experiments', value: String(realStats.experiments), color: 'text-science' },
