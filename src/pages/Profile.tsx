@@ -16,7 +16,7 @@ import { toast } from 'sonner';
 import {
   User, Mail, Phone, Shield, Award, Crown, Settings, Edit, Save, X,
   FlaskConical, Star, Trophy, Target, Calendar, Camera, Upload, MapPin,
-  GraduationCap, Clock, Zap
+  GraduationCap, Clock, Zap, Lock, Eye, EyeOff, KeyRound
 } from 'lucide-react';
 
 const Profile: React.FC = () => {
@@ -28,6 +28,9 @@ const Profile: React.FC = () => {
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [realStats, setRealStats] = useState({ experiments: 0, certificates: 0, achievements: 0, completedLessons: 0 });
+  const [pwd, setPwd] = useState({ current: '', next: '', confirm: '' });
+  const [showPwd, setShowPwd] = useState({ current: false, next: false, confirm: false });
+  const [changingPwd, setChangingPwd] = useState(false);
   const [formData, setFormData] = useState<{
     full_name: string;
     father_name: string;
@@ -145,6 +148,42 @@ const Profile: React.FC = () => {
       toast.error(isAmharic ? 'መገለጫ ማሻሻል አልተሳካም' : 'Failed to update profile');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!user?.email) return;
+    if (pwd.next.length < 8) {
+      toast.error(isAmharic ? 'የይለፍ ቃል ቢያንስ 8 ቁምፊዎች መሆን አለበት' : 'Password must be at least 8 characters');
+      return;
+    }
+    if (pwd.next !== pwd.confirm) {
+      toast.error(isAmharic ? 'የይለፍ ቃሎች አይዛመዱም' : 'Passwords do not match');
+      return;
+    }
+    if (pwd.next === pwd.current) {
+      toast.error(isAmharic ? 'አዲሱ የይለፍ ቃል ከአሮጌው የተለየ መሆን አለበት' : 'New password must differ from the current one');
+      return;
+    }
+    setChangingPwd(true);
+    try {
+      const { error: reauthError } = await supabase.auth.signInWithPassword({
+        email: user.email,
+        password: pwd.current,
+      });
+      if (reauthError) {
+        toast.error(isAmharic ? 'የአሁኑ የይለፍ ቃል ትክክል አይደለም' : 'Current password is incorrect');
+        return;
+      }
+      const { error } = await supabase.auth.updateUser({ password: pwd.next });
+      if (error) throw error;
+      toast.success(isAmharic ? 'የይለፍ ቃል ተቀይሯል' : 'Password updated successfully');
+      setPwd({ current: '', next: '', confirm: '' });
+    } catch (err) {
+      console.error('Password change error:', err);
+      toast.error(isAmharic ? 'የይለፍ ቃል መቀየር አልተሳካም' : 'Failed to update password');
+    } finally {
+      setChangingPwd(false);
     }
   };
 
@@ -554,6 +593,69 @@ const Profile: React.FC = () => {
                          profile?.preferred_language === 'or' ? 'Oromiffa' : 'English'}
                       </div>
                     )}
+                  </div>
+
+                  <Separator />
+
+                  {/* Change Password */}
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2">
+                      <KeyRound className="w-5 h-5 text-primary" />
+                      <h4 className="font-semibold text-base">{isAmharic ? 'የይለፍ ቃል ቀይር' : 'Change Password'}</h4>
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      {isAmharic
+                        ? 'መለያዎን ለመጠበቅ የይለፍ ቃልዎን በመደበኛነት ይቀይሩ።'
+                        : 'Keep your account secure by updating your password regularly.'}
+                    </p>
+
+                    <div className="grid gap-4 md:grid-cols-3">
+                      {([
+                        { key: 'current', label: isAmharic ? 'የአሁኑ የይለፍ ቃል' : 'Current Password' },
+                        { key: 'next', label: isAmharic ? 'አዲስ የይለፍ ቃል' : 'New Password' },
+                        { key: 'confirm', label: isAmharic ? 'አዲሱን ያረጋግጡ' : 'Confirm New' },
+                      ] as const).map((f) => (
+                        <div key={f.key} className="space-y-2">
+                          <Label>{f.label}</Label>
+                          <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                            <Input
+                              type={showPwd[f.key] ? 'text' : 'password'}
+                              value={pwd[f.key]}
+                              onChange={(e) => setPwd({ ...pwd, [f.key]: e.target.value })}
+                              className="pl-9 pr-10"
+                              placeholder="••••••••"
+                              autoComplete={f.key === 'current' ? 'current-password' : 'new-password'}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => setShowPwd({ ...showPwd, [f.key]: !showPwd[f.key] })}
+                              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+                              tabIndex={-1}
+                            >
+                              {showPwd[f.key] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center justify-between gap-3 flex-wrap">
+                      <p className="text-xs text-muted-foreground">
+                        {isAmharic
+                          ? 'ቢያንስ 8 ቁምፊዎች። ጠንካራ የይለፍ ቃል ይምረጡ።'
+                          : 'Minimum 8 characters. Use a strong, unique password.'}
+                      </p>
+                      <Button
+                        onClick={handleChangePassword}
+                        disabled={changingPwd || !pwd.current || !pwd.next || !pwd.confirm}
+                      >
+                        <KeyRound className="w-4 h-4 mr-2" />
+                        {changingPwd
+                          ? (isAmharic ? 'በመቀየር ላይ...' : 'Updating...')
+                          : (isAmharic ? 'የይለፍ ቃል አዘምን' : 'Update Password')}
+                      </Button>
+                    </div>
                   </div>
 
                   <Separator />
