@@ -1,73 +1,160 @@
-# Welcome to your Lovable project
+# 🧪 Dehinnet Kemi AI v2
 
-## Project info
+## Autonomous Multi-Agent Chemical Safety Intelligence System with Persistent Memory
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+Dehinnet Kemi AI v2 is an AI-powered chemical safety intelligence platform designed to help laboratories, researchers, educational institutions, and industrial environments analyze chemical risks, predict hazards, and generate intelligent safety recommendations.
 
-## How can I edit this code?
+Built for the Qwen Cloud Global Hackathon, the platform combines persistent memory, multi-agent reasoning, and autonomous investigation workflows to improve chemical safety decision-making.
 
-There are several ways of editing your application.
+---
 
-**Use Lovable**
+## 🚀 Key Features
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+### 🧠 Persistent Memory System
 
-Changes made via Lovable will be committed automatically to this repo.
+* Stores historical chemical analyses
+* Remembers previous incidents and risk assessments
+* Retrieves contextual safety knowledge
+* Learns from prior investigations
 
-**Use your preferred IDE**
+### 🤖 Multi-Agent Architecture
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+The platform uses specialized AI agents that collaborate to produce comprehensive safety analyses:
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+* **Research Agent** — Chemical properties and scientific analysis
+* **Risk Agent** — Hazard classification and risk prediction
+* **Environment Agent** — Environmental impact assessment
+* **Safety Agent** — Safety protocols and PPE recommendations
+* **Memory Agent** — Historical analysis retrieval
+* **Report Agent** — Final structured safety reports
 
-Follow these steps:
+### ⚡ Autonomous Investigation Mode
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+With one click, the system automatically:
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+* Performs chemical analysis
+* Predicts hazards
+* Evaluates environmental impact
+* Searches historical memory
+* Generates emergency procedures
+* Produces a final safety report
 
-# Step 3: Install the necessary dependencies.
-npm i
+---
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+## 🏗️ System Architecture
+
+```text
+User
+   ↓
+Frontend Application
+   ↓
+Backend Services
+   ↓
+Qwen Cloud API
+   ↓
+Multi-Agent System
+      ├── Research Agent
+      ├── Risk Agent
+      ├── Environment Agent
+      ├── Safety Agent
+      ├── Memory Agent
+      └── Report Agent
+   ↓
+Supabase Database
+   ↓
+Persistent Memory
+```
+
+---
+
+## 🛠️ Built With
+
+* Qwen Cloud API
+* Alibaba Cloud
+* Supabase
+* TypeScript
+* JavaScript
+* React
+* Vite
+* Tailwind CSS
+* Shadcn UI
+* Multi-Agent Architecture
+* Persistent Memory Systems
+* REST APIs
+
+---
+
+## 🔧 Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/YOUR_USERNAME/YOUR_REPOSITORY.git
+```
+
+Navigate to the project:
+
+```bash
+cd dehinnet-kemi-ai
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Start the development server:
+
+```bash
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+---
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 🌐 Live Demo
 
-**Use GitHub Codespaces**
+Demo URL:
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+https://dehinnet-kemi-ai.vercel.app/
 
-## What technologies are used for this project?
+---
 
-This project is built with:
+## 🎥 Demo Video
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+## 🎯 Hackathon Track
 
-## How can I deploy this project?
+**Primary Track:** MemoryAgent
 
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
+Additional capabilities demonstrated:
 
-## Can I connect a custom domain to my Lovable project?
+* Multi-Agent Collaboration
+* Autonomous AI Workflows
+* Persistent AI Memory
 
-Yes, you can!
+---
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 🔮 Future Work
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+Future development plans include:
+
+* Real-time laboratory monitoring
+* Chemical incident prediction
+* Regulatory compliance automation
+* Knowledge graph integration
+* Edge AI deployment
+* Advanced multi-agent collaboration
+
+---
+
+## 📄 License
+
+This project is released under the MIT License.
+
+---
+
+## 👨‍💻 Author
+
+Ayitegeb Tilahun
+
+Built for the Qwen Cloud Global Hackathon 2026.
