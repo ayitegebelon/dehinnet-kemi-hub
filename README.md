@@ -42,7 +42,9 @@ With one click, the system automatically:
 ---
 
 ## 🏗️ System Architecture
-
+<div align="center">
+  <img src="architecture_diagram_dehinnet_kemi_ai.png" width="900"/>
+</div>
 ```text
 User
    ↓
