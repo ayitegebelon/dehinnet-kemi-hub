@@ -529,8 +529,8 @@ const Admin: React.FC = () => {
           <Card className="bg-gradient-to-br from-science/10 to-science/5">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-science/20"><BookOpen className="h-5 w-5 text-science" /></div>
-                <div><p className="text-2xl font-bold">{courses.length}</p><p className="text-sm text-muted-foreground">Courses</p></div>
+                <div className="p-2 rounded-lg bg-science/20"><FlaskConical className="h-5 w-5 text-science" /></div>
+                <div><p className="text-2xl font-bold">{recipes.length}</p><p className="text-sm text-muted-foreground">Recipes</p></div>
               </div>
             </CardContent>
           </Card>
@@ -539,14 +539,6 @@ const Admin: React.FC = () => {
               <div className="flex items-center gap-3">
                 <div className="p-2 rounded-lg bg-success/20"><Shield className="h-5 w-5 text-success" /></div>
                 <div><p className="text-2xl font-bold">{avgSafetyScore}%</p><p className="text-sm text-muted-foreground">Avg Safety</p></div>
-              </div>
-            </CardContent>
-          </Card>
-          <Card className="bg-gradient-to-br from-destructive/10 to-destructive/5">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-destructive/20"><AlertTriangle className="h-5 w-5 text-destructive" /></div>
-                <div><p className="text-2xl font-bold">{flaggedAttempts.length}</p><p className="text-sm text-muted-foreground">Flagged</p></div>
               </div>
             </CardContent>
           </Card>
