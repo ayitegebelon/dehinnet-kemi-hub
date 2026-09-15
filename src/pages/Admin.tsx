@@ -1231,8 +1231,7 @@ const Admin: React.FC = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center"><span className="text-muted-foreground">Average Safety Score</span><span className="text-2xl font-bold text-primary">{avgSafetyScore}%</span></div>
                     <div className="flex justify-between items-center"><span className="text-muted-foreground">Total Recipes</span><span className="text-xl font-semibold">{recipes.length}</span></div>
-                    <div className="flex justify-between items-center"><span className="text-muted-foreground">Total Courses</span><span className="text-xl font-semibold">{courses.length}</span></div>
-                    <div className="flex justify-between items-center"><span className="text-muted-foreground">Total Lessons</span><span className="text-xl font-semibold">{lessons.length}</span></div>
+                    <div className="flex justify-between items-center"><span className="text-muted-foreground">Registered Users</span><span className="text-xl font-semibold">{totalUsers}</span></div>
                   </div>
                 </CardContent>
               </Card>
