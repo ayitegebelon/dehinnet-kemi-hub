@@ -65,31 +65,69 @@ Deno.serve(async (req) => {
 
     const userPrompt = `User Query:\n${chemical}\n\nMemory Data (past analyses for this user, may be empty):\n${memoryBlock}\n\nReturn the JSON response now.`;
 
-    const qwenRes = await fetch(`${QWEN_BASE_URL}/chat/completions`, {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${apiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: QWEN_MODEL,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userPrompt },
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0.3,
-      }),
-    });
+    const messages = [
+      { role: "system", content: SYSTEM_PROMPT },
+      { role: "user", content: userPrompt },
+    ];
 
-    if (!qwenRes.ok) {
-      const text = await qwenRes.text();
-      return new Response(JSON.stringify({ error: "Qwen API error", status: qwenRes.status, detail: text }), {
+    const callQwen = () =>
+      fetch(`${QWEN_BASE_URL}/chat/completions`, {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${apiKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: QWEN_MODEL,
+          messages,
+          response_format: { type: "json_object" },
+          temperature: 0.3,
+        }),
+      });
+
+    const callFallback = () =>
+      fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: { "Lovable-API-Key": lovableKey!, "Content-Type": "application/json", "X-Lovable-AIG-SDK": "fetch" },
+        body: JSON.stringify({
+          model: "google/gemini-3.8-flash",
+          messages,
+          response_format: { type: "json_object" },
+        }),
+      });
+
+    let res: Response | null = null;
+    let lastDetail = "";
+    let lastStatus = 502;
+
+    if (apiKey) {
+      res = await callQwen();
+      if (!res.ok) {
+        lastStatus = res.status;
+        lastDetail = await res.text();
+        res = null;
+      }
+    }
+
+    if (!res && lovableKey) {
+      const fb = await callFallback();
+      if (fb.ok) {
+        res = fb;
+      } else {
+        lastStatus = fb.status;
+        lastDetail = await fb.text();
+      }
+    }
+
+    if (!res) {
+      const friendly = lastStatus === 402
+        ? "AI credits exhausted. Please add credits to continue."
+        : lastStatus === 429
+        ? "Too many requests right now. Please try again in a moment."
+        : "The AI service is temporarily unavailable. Please try again.";
+      return new Response(JSON.stringify({ error: friendly, status: lastStatus, detail: lastDetail }), {
         status: 502, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 
-    const data = await qwenRes.json();
+    const data = await res.json();
     const content = data?.choices?.[0]?.message?.content ?? "{}";
 
     let parsed: any;
