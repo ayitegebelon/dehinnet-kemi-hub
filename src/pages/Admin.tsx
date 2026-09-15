@@ -114,41 +114,6 @@ const Admin: React.FC = () => {
   });
   const [sendingNotif, setSendingNotif] = useState(false);
 
-  const fetchSignature = async () => {
-    const { data } = supabase.storage.from('signatures').getPublicUrl('director-signature.png');
-    // Check if file exists
-    const res = await fetch(data.publicUrl, { method: 'HEAD' });
-    if (res.ok) setSignatureUrl(data.publicUrl);
-    else setSignatureUrl(null);
-  };
-
-  const handleSignatureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadingSignature(true);
-    try {
-      // Remove old file first
-      await supabase.storage.from('signatures').remove(['director-signature.png']);
-      const { error } = await supabase.storage.from('signatures').upload('director-signature.png', file, { upsert: true });
-      if (error) throw error;
-      toast.success('Signature uploaded successfully!');
-      await fetchSignature();
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to upload signature');
-    } finally {
-      setUploadingSignature(false);
-    }
-  };
-
-  const handleRemoveSignature = async () => {
-    try {
-      await supabase.storage.from('signatures').remove(['director-signature.png']);
-      setSignatureUrl(null);
-      toast.success('Signature removed');
-    } catch {
-      toast.error('Failed to remove signature');
-    }
-  };
 
   useEffect(() => {
     if (!isAdmin && !isSuperAdmin) {
