@@ -18,8 +18,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
   Users, FlaskConical, BarChart3, Shield, Search, Plus, Edit, Trash2,
-  Crown, TrendingUp, Activity, DollarSign, BookOpen, Video, HelpCircle,
-  AlertTriangle, Eye, Settings, Upload, Image, Bell, Send, CheckCircle2
+  Crown, TrendingUp, Activity, DollarSign,
+  Eye, Bell, Send, CheckCircle2
 } from 'lucide-react';
 
 interface User {
