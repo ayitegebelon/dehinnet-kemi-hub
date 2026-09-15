@@ -95,9 +95,6 @@ const Admin: React.FC = () => {
     correct_answer: '0', explanation_en: '', explanation_am: '',
   });
 
-  // Signature state
-  const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
-  const [uploadingSignature, setUploadingSignature] = useState(false);
 
   // User management state
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
