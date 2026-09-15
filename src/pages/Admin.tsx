@@ -1249,63 +1249,6 @@ const Admin: React.FC = () => {
             </div>
           </TabsContent>
 
-          {/* Settings Tab */}
-          <TabsContent value="settings">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Settings className="h-5 w-5" />Certificate Settings</CardTitle>
-                <CardDescription>Manage director signature for certificates</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div>
-                    <Label className="text-base font-semibold mb-3 block">Director Signature</Label>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Upload the director's signature image. This will appear on all certificates when students download them.
-                    </p>
-                    
-                    {signatureUrl ? (
-                      <div className="space-y-4">
-                        <div className="border rounded-lg p-6 bg-muted/30 flex flex-col items-center gap-4">
-                          <p className="text-sm text-muted-foreground">Current Signature:</p>
-                          <img src={signatureUrl + '?t=' + Date.now()} alt="Director Signature" className="max-h-24 max-w-xs object-contain" />
-                        </div>
-                        <div className="flex gap-3">
-                          <Button variant="outline" onClick={() => document.getElementById('sig-upload')?.click()}>
-                            <Upload className="h-4 w-4 mr-2" />Replace Signature
-                          </Button>
-                          <Button variant="destructive" size="sm" onClick={handleRemoveSignature}>
-                            <Trash2 className="h-4 w-4 mr-2" />Remove
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="border-2 border-dashed rounded-lg p-8 text-center">
-                        <Image className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
-                        <p className="text-muted-foreground mb-3">No signature uploaded yet</p>
-                        <Button onClick={() => document.getElementById('sig-upload')?.click()} disabled={uploadingSignature}>
-                          <Upload className="h-4 w-4 mr-2" />
-                          {uploadingSignature ? 'Uploading...' : 'Upload Signature'}
-                        </Button>
-                      </div>
-                    )}
-                    
-                    <input
-                      id="sig-upload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleSignatureUpload}
-                    />
-                    
-                    <p className="text-xs text-muted-foreground mt-3">
-                      Recommended: PNG with transparent background, approximately 300×100 pixels.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
     </Layout>
