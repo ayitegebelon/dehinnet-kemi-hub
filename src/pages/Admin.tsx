@@ -55,12 +55,9 @@ const Admin: React.FC = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTab, setSelectedTab] = useState('users');
-  const [flaggedAttempts, setFlaggedAttempts] = useState<QuizAttempt[]>([]);
 
   // Recipe form state
   const [isRecipeDialogOpen, setIsRecipeDialogOpen] = useState(false);
