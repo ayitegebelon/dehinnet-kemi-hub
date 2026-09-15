@@ -44,8 +44,9 @@ Deno.serve(async (req) => {
 
   try {
     const apiKey = Deno.env.get("QWEN_API_KEY");
-    if (!apiKey) {
-      return new Response(JSON.stringify({ error: "QWEN_API_KEY missing" }), {
+    const lovableKey = Deno.env.get("LOVABLE_API_KEY");
+    if (!apiKey && !lovableKey) {
+      return new Response(JSON.stringify({ error: "No AI provider configured" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
