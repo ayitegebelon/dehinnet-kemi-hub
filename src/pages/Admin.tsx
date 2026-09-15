@@ -18,8 +18,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import {
   Users, FlaskConical, BarChart3, Shield, Search, Plus, Edit, Trash2,
-  Crown, TrendingUp, Activity, DollarSign, BookOpen, Video, HelpCircle,
-  AlertTriangle, Eye, Settings, Upload, Image, Bell, Send, CheckCircle2
+  Crown, TrendingUp, Activity, DollarSign,
+  Eye, Bell, Send, CheckCircle2
 } from 'lucide-react';
 
 interface User {
@@ -48,55 +48,6 @@ interface Recipe {
   created_at: string;
 }
 
-interface Course {
-  id: string;
-  title_en: string;
-  title_am: string;
-  category: string;
-  difficulty: string;
-  is_premium: boolean;
-  total_lessons: number;
-}
-
-interface Lesson {
-  id: string;
-  course_id: string;
-  title_en: string;
-  title_am: string;
-  video_url: string | null;
-  order_index: number;
-  duration_minutes: number;
-  content_en: string | null;
-  content_am: string | null;
-}
-
-interface Quiz {
-  id: string;
-  lesson_id: string;
-  question_en: string;
-  question_am: string;
-  options: string[];
-  correct_answer: number;
-  explanation_en: string | null;
-  explanation_am: string | null;
-}
-
-interface QuizAttempt {
-  id: string;
-  user_id: string;
-  lesson_id: string;
-  course_id: string;
-  quiz_score: number;
-  integrity_score: number;
-  tab_switch_count: number;
-  copy_paste_count: number;
-  focus_lost_count: number;
-  rapid_answer_count: number;
-  flagged: boolean;
-  warnings: string[];
-  student_name: string | null;
-  completed_at: string;
-}
 
 const Admin: React.FC = () => {
   const { t, language } = useLanguage();
@@ -104,12 +55,9 @@ const Admin: React.FC = () => {
   const navigate = useNavigate();
   const [users, setUsers] = useState<User[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
-  const [courses, setCourses] = useState<Course[]>([]);
-  const [lessons, setLessons] = useState<Lesson[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedTab, setSelectedTab] = useState('users');
-  const [flaggedAttempts, setFlaggedAttempts] = useState<QuizAttempt[]>([]);
 
   // Recipe form state
   const [isRecipeDialogOpen, setIsRecipeDialogOpen] = useState(false);
@@ -144,9 +92,6 @@ const Admin: React.FC = () => {
     correct_answer: '0', explanation_en: '', explanation_am: '',
   });
 
-  // Signature state
-  const [signatureUrl, setSignatureUrl] = useState<string | null>(null);
-  const [uploadingSignature, setUploadingSignature] = useState(false);
 
   // User management state
   const [isUserDialogOpen, setIsUserDialogOpen] = useState(false);
@@ -166,41 +111,6 @@ const Admin: React.FC = () => {
   });
   const [sendingNotif, setSendingNotif] = useState(false);
 
-  const fetchSignature = async () => {
-    const { data } = supabase.storage.from('signatures').getPublicUrl('director-signature.png');
-    // Check if file exists
-    const res = await fetch(data.publicUrl, { method: 'HEAD' });
-    if (res.ok) setSignatureUrl(data.publicUrl);
-    else setSignatureUrl(null);
-  };
-
-  const handleSignatureUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploadingSignature(true);
-    try {
-      // Remove old file first
-      await supabase.storage.from('signatures').remove(['director-signature.png']);
-      const { error } = await supabase.storage.from('signatures').upload('director-signature.png', file, { upsert: true });
-      if (error) throw error;
-      toast.success('Signature uploaded successfully!');
-      await fetchSignature();
-    } catch (err: any) {
-      toast.error(err.message || 'Failed to upload signature');
-    } finally {
-      setUploadingSignature(false);
-    }
-  };
-
-  const handleRemoveSignature = async () => {
-    try {
-      await supabase.storage.from('signatures').remove(['director-signature.png']);
-      setSignatureUrl(null);
-      toast.success('Signature removed');
-    } catch {
-      toast.error('Failed to remove signature');
-    }
-  };
 
   useEffect(() => {
     if (!isAdmin && !isSuperAdmin) {
@@ -208,27 +118,19 @@ const Admin: React.FC = () => {
       return;
     }
     fetchData();
-    fetchSignature();
+    
   }, [isAdmin, isSuperAdmin, navigate]);
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [usersRes, recipesRes, coursesRes, lessonsRes, quizzesRes, attemptsRes] = await Promise.all([
+      const [usersRes, recipesRes] = await Promise.all([
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('recipes').select('*').order('created_at', { ascending: false }),
-        supabase.from('courses').select('*').order('created_at', { ascending: false }),
-        supabase.from('lessons').select('*').order('order_index'),
-        supabase.from('quizzes').select('*').order('created_at'),
-        (supabase.from('quiz_attempts' as any) as any).select('*').order('completed_at', { ascending: false }),
       ]);
 
       if (usersRes.data) setUsers(usersRes.data);
       if (recipesRes.data) setRecipes(recipesRes.data);
-      if (coursesRes.data) setCourses(coursesRes.data as Course[]);
-      if (lessonsRes.data) setLessons(lessonsRes.data as Lesson[]);
-      if (quizzesRes.data) setQuizzes(quizzesRes.data as Quiz[]);
-      if (attemptsRes.data) setFlaggedAttempts((attemptsRes.data as unknown as QuizAttempt[]).filter(a => a.flagged || a.integrity_score < 80));
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Failed to load data');
@@ -291,11 +193,8 @@ const Admin: React.FC = () => {
     try {
       // Delete related data first
       await Promise.all([
-        supabase.from('user_progress').delete().eq('user_id', u.user_id),
         supabase.from('achievements').delete().eq('user_id', u.user_id),
-        supabase.from('certificates').delete().eq('user_id', u.user_id),
         supabase.from('experiments').delete().eq('user_id', u.user_id),
-        supabase.from('study_streaks').delete().eq('user_id', u.user_id),
         supabase.from('notifications').delete().eq('user_id', u.user_id),
         supabase.from('user_roles').delete().eq('user_id', u.user_id),
         supabase.from('lab_notebook').delete().eq('user_id', u.user_id),
@@ -395,129 +294,6 @@ const Admin: React.FC = () => {
     } catch (error) { toast.error('Failed to delete recipe'); }
   };
 
-  const handleCreateCourse = async () => {
-    try {
-      const { error } = await supabase.from('courses').insert({
-        title_en: courseForm.title_en, title_am: courseForm.title_am,
-        description_en: courseForm.description_en, description_am: courseForm.description_am,
-        category: courseForm.category, difficulty: courseForm.difficulty, is_premium: courseForm.is_premium,
-      });
-      if (error) throw error;
-      toast.success('Course created!');
-      setIsCourseDialogOpen(false);
-      setCourseForm({ title_en: '', title_am: '', description_en: '', description_am: '', category: 'general', difficulty: 'beginner', is_premium: false });
-      fetchData();
-    } catch (error) { toast.error('Failed to create course'); }
-  };
-
-  const handleDeleteCourse = async (id: string) => {
-    if (!confirm('Delete this course and all its lessons?')) return;
-    try {
-      await supabase.from('lessons').delete().eq('course_id', id);
-      const { error } = await supabase.from('courses').delete().eq('id', id);
-      if (error) throw error;
-      toast.success('Course deleted');
-      fetchData();
-    } catch (error) { toast.error('Failed to delete course'); }
-  };
-
-  const handleSaveLesson = async () => {
-    try {
-      const data = {
-        course_id: lessonForm.course_id,
-        title_en: lessonForm.title_en, title_am: lessonForm.title_am,
-        video_url: lessonForm.video_url || null,
-        content_en: lessonForm.content_en || null, content_am: lessonForm.content_am || null,
-        duration_minutes: parseInt(lessonForm.duration_minutes) || 10,
-        order_index: parseInt(lessonForm.order_index) || 0,
-      };
-      if (editingLesson) {
-        const { error } = await supabase.from('lessons').update(data).eq('id', editingLesson.id);
-        if (error) throw error;
-        toast.success('Lesson updated!');
-      } else {
-        const { error } = await supabase.from('lessons').insert(data);
-        if (error) throw error;
-        toast.success('Lesson created!');
-      }
-      setIsLessonDialogOpen(false);
-      setEditingLesson(null);
-      setLessonForm({ course_id: '', title_en: '', title_am: '', video_url: '', content_en: '', content_am: '', duration_minutes: '10', order_index: '0' });
-      fetchData();
-    } catch (error) { toast.error('Failed to save lesson'); }
-  };
-
-  const openEditLesson = (lesson: Lesson) => {
-    setEditingLesson(lesson);
-    setLessonForm({
-      course_id: lesson.course_id, title_en: lesson.title_en, title_am: lesson.title_am,
-      video_url: lesson.video_url || '', content_en: lesson.content_en || '', content_am: lesson.content_am || '',
-      duration_minutes: String(lesson.duration_minutes || 10), order_index: String(lesson.order_index || 0),
-    });
-    setIsLessonDialogOpen(true);
-  };
-
-  const handleDeleteLesson = async (id: string) => {
-    if (!confirm('Delete this lesson?')) return;
-    try {
-      const { error } = await supabase.from('lessons').delete().eq('id', id);
-      if (error) throw error;
-      toast.success('Lesson deleted');
-      fetchData();
-    } catch (error) { toast.error('Failed to delete lesson'); }
-  };
-
-  const handleSaveQuiz = async () => {
-    try {
-      const options = [quizForm.option_0, quizForm.option_1, quizForm.option_2, quizForm.option_3].filter(o => o.trim());
-      const data = {
-        lesson_id: quizForm.lesson_id, question_en: quizForm.question_en, question_am: quizForm.question_am,
-        options, correct_answer: parseInt(quizForm.correct_answer),
-        explanation_en: quizForm.explanation_en || null, explanation_am: quizForm.explanation_am || null,
-      };
-      if (editingQuiz) {
-        const { error } = await supabase.from('quizzes').update(data).eq('id', editingQuiz.id);
-        if (error) throw error;
-        toast.success('Quiz updated!');
-      } else {
-        const { error } = await supabase.from('quizzes').insert(data);
-        if (error) throw error;
-        toast.success('Quiz created!');
-      }
-      setIsQuizDialogOpen(false);
-      setEditingQuiz(null);
-      resetQuizForm();
-      fetchData();
-    } catch (error) { toast.error('Failed to save quiz'); }
-  };
-
-  const resetQuizForm = () => setQuizForm({
-    lesson_id: '', question_en: '', question_am: '',
-    option_0: '', option_1: '', option_2: '', option_3: '',
-    correct_answer: '0', explanation_en: '', explanation_am: '',
-  });
-
-  const openEditQuiz = (quiz: Quiz) => {
-    setEditingQuiz(quiz);
-    const opts = Array.isArray(quiz.options) ? quiz.options : [];
-    setQuizForm({
-      lesson_id: quiz.lesson_id, question_en: quiz.question_en, question_am: quiz.question_am,
-      option_0: opts[0] || '', option_1: opts[1] || '', option_2: opts[2] || '', option_3: opts[3] || '',
-      correct_answer: String(quiz.correct_answer),
-      explanation_en: quiz.explanation_en || '', explanation_am: quiz.explanation_am || '',
-    });
-    setIsQuizDialogOpen(true);
-  };
-
-  const handleDeleteQuiz = async (id: string) => {
-    if (!confirm('Delete this quiz question?')) return;
-    try {
-      const { error } = await supabase.from('quizzes').delete().eq('id', id);
-      if (error) throw error;
-      toast.success('Quiz deleted');
-      fetchData();
-    } catch (error) { toast.error('Failed to delete quiz'); }
-  };
 
   const filteredUsers = users.filter(u =>
     u.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -558,7 +334,7 @@ const Admin: React.FC = () => {
         </div>
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
           <Card className="bg-gradient-to-br from-primary/10 to-primary/5">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
@@ -578,8 +354,8 @@ const Admin: React.FC = () => {
           <Card className="bg-gradient-to-br from-science/10 to-science/5">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-science/20"><BookOpen className="h-5 w-5 text-science" /></div>
-                <div><p className="text-2xl font-bold">{courses.length}</p><p className="text-sm text-muted-foreground">Courses</p></div>
+                <div className="p-2 rounded-lg bg-science/20"><FlaskConical className="h-5 w-5 text-science" /></div>
+                <div><p className="text-2xl font-bold">{recipes.length}</p><p className="text-sm text-muted-foreground">Recipes</p></div>
               </div>
             </CardContent>
           </Card>
@@ -591,30 +367,15 @@ const Admin: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-          <Card className="bg-gradient-to-br from-destructive/10 to-destructive/5">
-            <CardContent className="pt-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-destructive/20"><AlertTriangle className="h-5 w-5 text-destructive" /></div>
-                <div><p className="text-2xl font-bold">{flaggedAttempts.length}</p><p className="text-sm text-muted-foreground">Flagged</p></div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Tabs */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-          <TabsList className="grid w-full grid-cols-8 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="users" className="flex items-center gap-1 text-xs"><Users className="h-4 w-4" />{t('admin.users')}</TabsTrigger>
             <TabsTrigger value="recipes" className="flex items-center gap-1 text-xs"><FlaskConical className="h-4 w-4" />{t('admin.recipes')}</TabsTrigger>
-            <TabsTrigger value="courses" className="flex items-center gap-1 text-xs"><BookOpen className="h-4 w-4" />Courses</TabsTrigger>
-            <TabsTrigger value="quizzes" className="flex items-center gap-1 text-xs"><HelpCircle className="h-4 w-4" />Quizzes</TabsTrigger>
             <TabsTrigger value="notifications" className="flex items-center gap-1 text-xs"><Bell className="h-4 w-4" />Notify</TabsTrigger>
-            <TabsTrigger value="integrity" className="flex items-center gap-1 text-xs">
-              <AlertTriangle className="h-4 w-4" />Integrity
-              {flaggedAttempts.length > 0 && <Badge variant="destructive" className="text-[10px] px-1.5 py-0">{flaggedAttempts.length}</Badge>}
-            </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-1 text-xs"><BarChart3 className="h-4 w-4" />{t('admin.analytics')}</TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-1 text-xs"><Settings className="h-4 w-4" />Settings</TabsTrigger>
           </TabsList>
 
           {/* Users Tab */}
@@ -868,215 +629,6 @@ const Admin: React.FC = () => {
             </Card>
           </TabsContent>
 
-          {/* Courses & Lessons Tab */}
-          <TabsContent value="courses">
-            <div className="space-y-6">
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div><CardTitle>Courses</CardTitle><CardDescription>Manage university courses</CardDescription></div>
-                  <Dialog open={isCourseDialogOpen} onOpenChange={setIsCourseDialogOpen}>
-                    <DialogTrigger asChild><Button className="flex items-center gap-2"><Plus className="h-4 w-4" />Add Course</Button></DialogTrigger>
-                    <DialogContent className="max-w-lg">
-                      <DialogHeader><DialogTitle>Create New Course</DialogTitle></DialogHeader>
-                      <div className="grid gap-4 py-4">
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2"><Label>Title (EN)</Label><Input value={courseForm.title_en} onChange={(e) => setCourseForm({...courseForm, title_en: e.target.value})} /></div>
-                          <div className="space-y-2"><Label>Title (AM)</Label><Input value={courseForm.title_am} onChange={(e) => setCourseForm({...courseForm, title_am: e.target.value})} /></div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-2"><Label>Description (EN)</Label><Textarea value={courseForm.description_en} onChange={(e) => setCourseForm({...courseForm, description_en: e.target.value})} /></div>
-                          <div className="space-y-2"><Label>Description (AM)</Label><Textarea value={courseForm.description_am} onChange={(e) => setCourseForm({...courseForm, description_am: e.target.value})} /></div>
-                        </div>
-                        <div className="grid grid-cols-3 gap-4">
-                          <div className="space-y-2"><Label>Category</Label><Input value={courseForm.category} onChange={(e) => setCourseForm({...courseForm, category: e.target.value})} /></div>
-                          <div className="space-y-2"><Label>Difficulty</Label>
-                            <Select value={courseForm.difficulty} onValueChange={(v) => setCourseForm({...courseForm, difficulty: v})}><SelectTrigger><SelectValue /></SelectTrigger><SelectContent><SelectItem value="beginner">Beginner</SelectItem><SelectItem value="intermediate">Intermediate</SelectItem><SelectItem value="advanced">Advanced</SelectItem></SelectContent></Select>
-                          </div>
-                          <div className="space-y-2"><Label>Premium</Label><div className="flex items-center h-10"><Switch checked={courseForm.is_premium} onCheckedChange={(c) => setCourseForm({...courseForm, is_premium: c})} /></div></div>
-                        </div>
-                      </div>
-                      <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsCourseDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={handleCreateCourse}>Create Course</Button>
-                      </DialogFooter>
-                    </DialogContent>
-                  </Dialog>
-                </CardHeader>
-                <CardContent>
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader><TableRow><TableHead>Course</TableHead><TableHead>Category</TableHead><TableHead>Difficulty</TableHead><TableHead>Lessons</TableHead><TableHead>Actions</TableHead></TableRow></TableHeader>
-                      <TableBody>
-                        {courses.map((c) => (
-                          <TableRow key={c.id}>
-                            <TableCell className="font-medium">{language === 'am' ? c.title_am : c.title_en}</TableCell>
-                            <TableCell><Badge variant="secondary">{c.category}</Badge></TableCell>
-                            <TableCell><Badge>{c.difficulty}</Badge></TableCell>
-                            <TableCell>{lessons.filter(l => l.course_id === c.id).length}</TableCell>
-                            <TableCell>
-                              <Button variant="ghost" size="icon" onClick={() => handleDeleteCourse(c.id)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                            </TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                  <div><CardTitle className="flex items-center gap-2"><Video className="h-5 w-5" />Lessons</CardTitle><CardDescription>Manage lessons</CardDescription></div>
-                  <Button className="flex items-center gap-2" onClick={() => { setEditingLesson(null); setLessonForm({ course_id: courses[0]?.id || '', title_en: '', title_am: '', video_url: '', content_en: '', content_am: '', duration_minutes: '10', order_index: '0' }); setIsLessonDialogOpen(true); }}>
-                    <Plus className="h-4 w-4" />Add Lesson
-                  </Button>
-                </CardHeader>
-                <CardContent>
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader><TableRow><TableHead>Lesson</TableHead><TableHead>Course</TableHead><TableHead>Video</TableHead><TableHead>Duration</TableHead><TableHead>Actions</TableHead></TableRow></TableHeader>
-                      <TableBody>
-                        {lessons.map((l) => {
-                          const course = courses.find(c => c.id === l.course_id);
-                          return (
-                            <TableRow key={l.id}>
-                              <TableCell className="font-medium">{l.title_en}</TableCell>
-                              <TableCell className="text-sm text-muted-foreground">{course?.title_en || '—'}</TableCell>
-                              <TableCell>{l.video_url ? <Badge variant="secondary" className="text-xs">✓ Has Video</Badge> : <span className="text-muted-foreground text-xs">No video</span>}</TableCell>
-                              <TableCell>{l.duration_minutes} min</TableCell>
-                              <TableCell>
-                                <div className="flex items-center gap-1">
-                                  <Button variant="ghost" size="icon" onClick={() => openEditLesson(l)}><Edit className="h-4 w-4" /></Button>
-                                  <Button variant="ghost" size="icon" onClick={() => handleDeleteLesson(l.id)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Dialog open={isLessonDialogOpen} onOpenChange={setIsLessonDialogOpen}>
-                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                  <DialogHeader><DialogTitle>{editingLesson ? 'Edit Lesson' : 'Create New Lesson'}</DialogTitle></DialogHeader>
-                  <div className="grid gap-4 py-4">
-                    <div className="space-y-2">
-                      <Label>Course</Label>
-                      <Select value={lessonForm.course_id} onValueChange={(v) => setLessonForm({...lessonForm, course_id: v})}>
-                        <SelectTrigger><SelectValue placeholder="Select course" /></SelectTrigger>
-                        <SelectContent>{courses.map(c => <SelectItem key={c.id} value={c.id}>{c.title_en}</SelectItem>)}</SelectContent>
-                      </Select>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2"><Label>Title (EN)</Label><Input value={lessonForm.title_en} onChange={(e) => setLessonForm({...lessonForm, title_en: e.target.value})} /></div>
-                      <div className="space-y-2"><Label>Title (AM)</Label><Input value={lessonForm.title_am} onChange={(e) => setLessonForm({...lessonForm, title_am: e.target.value})} /></div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Video URL</Label>
-                      <Input value={lessonForm.video_url} onChange={(e) => setLessonForm({...lessonForm, video_url: e.target.value})} placeholder="https://www.youtube.com/embed/VIDEO_ID" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2"><Label>Duration (min)</Label><Input type="number" value={lessonForm.duration_minutes} onChange={(e) => setLessonForm({...lessonForm, duration_minutes: e.target.value})} /></div>
-                      <div className="space-y-2"><Label>Order</Label><Input type="number" value={lessonForm.order_index} onChange={(e) => setLessonForm({...lessonForm, order_index: e.target.value})} /></div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                      <div className="space-y-2"><Label>Content (EN)</Label><Textarea value={lessonForm.content_en} onChange={(e) => setLessonForm({...lessonForm, content_en: e.target.value})} rows={5} /></div>
-                      <div className="space-y-2"><Label>Content (AM)</Label><Textarea value={lessonForm.content_am} onChange={(e) => setLessonForm({...lessonForm, content_am: e.target.value})} rows={5} /></div>
-                    </div>
-                  </div>
-                  <DialogFooter>
-                    <Button variant="outline" onClick={() => setIsLessonDialogOpen(false)}>Cancel</Button>
-                    <Button onClick={handleSaveLesson}>{editingLesson ? 'Update' : 'Create'} Lesson</Button>
-                  </DialogFooter>
-                </DialogContent>
-              </Dialog>
-            </div>
-          </TabsContent>
-
-          {/* Quizzes Tab */}
-          <TabsContent value="quizzes">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div><CardTitle className="flex items-center gap-2"><HelpCircle className="h-5 w-5" />Quiz Questions</CardTitle></div>
-                <Button className="flex items-center gap-2" onClick={() => { setEditingQuiz(null); resetQuizForm(); setQuizForm(prev => ({ ...prev, lesson_id: lessons[0]?.id || '' })); setIsQuizDialogOpen(true); }}>
-                  <Plus className="h-4 w-4" />Add Question
-                </Button>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader><TableRow><TableHead>Question</TableHead><TableHead>Lesson</TableHead><TableHead>Options</TableHead><TableHead>Actions</TableHead></TableRow></TableHeader>
-                    <TableBody>
-                      {quizzes.map((q) => {
-                        const lesson = lessons.find(l => l.id === q.lesson_id);
-                        const opts = Array.isArray(q.options) ? q.options : [];
-                        return (
-                          <TableRow key={q.id}>
-                            <TableCell className="font-medium max-w-xs truncate">{q.question_en}</TableCell>
-                            <TableCell className="text-sm text-muted-foreground">{lesson?.title_en || '—'}</TableCell>
-                            <TableCell><Badge variant="secondary">{opts.length} options</Badge></TableCell>
-                            <TableCell>
-                              <div className="flex items-center gap-1">
-                                <Button variant="ghost" size="icon" onClick={() => openEditQuiz(q)}><Edit className="h-4 w-4" /></Button>
-                                <Button variant="ghost" size="icon" onClick={() => handleDeleteQuiz(q.id)} className="text-destructive hover:text-destructive"><Trash2 className="h-4 w-4" /></Button>
-                              </div>
-                            </TableCell>
-                          </TableRow>
-                        );
-                      })}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Dialog open={isQuizDialogOpen} onOpenChange={setIsQuizDialogOpen}>
-              <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-                <DialogHeader><DialogTitle>{editingQuiz ? 'Edit Quiz Question' : 'Create Quiz Question'}</DialogTitle></DialogHeader>
-                <div className="grid gap-4 py-4">
-                  <div className="space-y-2">
-                    <Label>Lesson</Label>
-                    <Select value={quizForm.lesson_id} onValueChange={(v) => setQuizForm({...quizForm, lesson_id: v})}>
-                      <SelectTrigger><SelectValue placeholder="Select lesson" /></SelectTrigger>
-                      <SelectContent>{lessons.map(l => <SelectItem key={l.id} value={l.id}>{l.title_en}</SelectItem>)}</SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label>Question (EN)</Label><Textarea value={quizForm.question_en} onChange={(e) => setQuizForm({...quizForm, question_en: e.target.value})} /></div>
-                    <div className="space-y-2"><Label>Question (AM)</Label><Textarea value={quizForm.question_am} onChange={(e) => setQuizForm({...quizForm, question_am: e.target.value})} /></div>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label>Option A</Label><Input value={quizForm.option_0} onChange={(e) => setQuizForm({...quizForm, option_0: e.target.value})} /></div>
-                    <div className="space-y-2"><Label>Option B</Label><Input value={quizForm.option_1} onChange={(e) => setQuizForm({...quizForm, option_1: e.target.value})} /></div>
-                    <div className="space-y-2"><Label>Option C</Label><Input value={quizForm.option_2} onChange={(e) => setQuizForm({...quizForm, option_2: e.target.value})} /></div>
-                    <div className="space-y-2"><Label>Option D</Label><Input value={quizForm.option_3} onChange={(e) => setQuizForm({...quizForm, option_3: e.target.value})} /></div>
-                  </div>
-                  <div className="space-y-2">
-                    <Label>Correct Answer</Label>
-                    <Select value={quizForm.correct_answer} onValueChange={(v) => setQuizForm({...quizForm, correct_answer: v})}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="0">A</SelectItem><SelectItem value="1">B</SelectItem>
-                        <SelectItem value="2">C</SelectItem><SelectItem value="3">D</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2"><Label>Explanation (EN)</Label><Textarea value={quizForm.explanation_en} onChange={(e) => setQuizForm({...quizForm, explanation_en: e.target.value})} /></div>
-                    <div className="space-y-2"><Label>Explanation (AM)</Label><Textarea value={quizForm.explanation_am} onChange={(e) => setQuizForm({...quizForm, explanation_am: e.target.value})} /></div>
-                  </div>
-                </div>
-                <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsQuizDialogOpen(false)}>Cancel</Button>
-                  <Button onClick={handleSaveQuiz}>{editingQuiz ? 'Update' : 'Create'} Question</Button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          </TabsContent>
-
           {/* Notifications Tab */}
           <TabsContent value="notifications">
             <Card>
@@ -1163,103 +715,6 @@ const Admin: React.FC = () => {
             </Card>
           </TabsContent>
 
-          {/* Integrity / Flagged Attempts Tab */}
-          <TabsContent value="integrity">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <AlertTriangle className="h-5 w-5 text-destructive" />
-                  Flagged Quiz Attempts
-                </CardTitle>
-                <CardDescription>
-                  Review quiz attempts with suspicious activity or low integrity scores
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                {flaggedAttempts.length === 0 ? (
-                  <div className="text-center py-12">
-                    <Shield className="h-16 w-16 text-muted-foreground/20 mx-auto mb-4" />
-                    <p className="text-muted-foreground font-medium">No flagged attempts</p>
-                    <p className="text-sm text-muted-foreground">All quiz attempts appear legitimate</p>
-                  </div>
-                ) : (
-                  <div className="overflow-x-auto">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Student</TableHead>
-                          <TableHead>Course</TableHead>
-                          <TableHead>Quiz Score</TableHead>
-                          <TableHead>Integrity</TableHead>
-                          <TableHead>Tab Switches</TableHead>
-                          <TableHead>Copy/Paste</TableHead>
-                          <TableHead>Focus Lost</TableHead>
-                          <TableHead>Fast Answers</TableHead>
-                          <TableHead>Warnings</TableHead>
-                          <TableHead>Date</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {flaggedAttempts.map((attempt) => {
-                          const course = courses.find(c => c.id === attempt.course_id);
-                          const lesson = lessons.find(l => l.id === attempt.lesson_id);
-                          const studentProfile = users.find(u => u.user_id === attempt.user_id);
-                          return (
-                            <TableRow key={attempt.id} className={attempt.integrity_score < 60 ? 'bg-destructive/5' : ''}>
-                              <TableCell className="font-medium">
-                                {studentProfile?.full_name || attempt.student_name || 'Unknown'}
-                              </TableCell>
-                              <TableCell>
-                                <div>
-                                  <p className="text-sm">{course?.title_en || '—'}</p>
-                                  <p className="text-xs text-muted-foreground">{lesson?.title_en || ''}</p>
-                                </div>
-                              </TableCell>
-                              <TableCell>
-                                <Badge className={attempt.quiz_score >= 80 ? 'bg-primary/20 text-primary' : attempt.quiz_score >= 60 ? 'bg-accent/20 text-accent-foreground' : 'bg-destructive/20 text-destructive'}>
-                                  {attempt.quiz_score}%
-                                </Badge>
-                              </TableCell>
-                              <TableCell>
-                                <Badge className={attempt.integrity_score >= 80 ? 'bg-primary/20 text-primary' : attempt.integrity_score >= 60 ? 'bg-accent/20 text-accent-foreground' : 'bg-destructive/20 text-destructive'}>
-                                  {attempt.integrity_score}%
-                                </Badge>
-                              </TableCell>
-                              <TableCell className="text-center">
-                                <span className={attempt.tab_switch_count >= 3 ? 'text-destructive font-bold' : ''}>{attempt.tab_switch_count}</span>
-                              </TableCell>
-                              <TableCell className="text-center">
-                                <span className={attempt.copy_paste_count >= 2 ? 'text-destructive font-bold' : ''}>{attempt.copy_paste_count}</span>
-                              </TableCell>
-                              <TableCell className="text-center">
-                                <span className={attempt.focus_lost_count >= 4 ? 'text-destructive font-bold' : ''}>{attempt.focus_lost_count}</span>
-                              </TableCell>
-                              <TableCell className="text-center">
-                                <span className={attempt.rapid_answer_count > 2 ? 'text-destructive font-bold' : ''}>{attempt.rapid_answer_count}</span>
-                              </TableCell>
-                              <TableCell>
-                                {attempt.warnings && attempt.warnings.length > 0 ? (
-                                  <div className="space-y-1">
-                                    {attempt.warnings.map((w, i) => (
-                                      <p key={i} className="text-xs text-muted-foreground">{w}</p>
-                                    ))}
-                                  </div>
-                                ) : '—'}
-                              </TableCell>
-                              <TableCell className="text-xs text-muted-foreground whitespace-nowrap">
-                                {new Date(attempt.completed_at).toLocaleDateString()}
-                              </TableCell>
-                            </TableRow>
-                          );
-                        })}
-                      </TableBody>
-                    </Table>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </TabsContent>
-
           {/* Analytics Tab */}
           <TabsContent value="analytics">
             <div className="grid md:grid-cols-2 gap-6">
@@ -1280,8 +735,7 @@ const Admin: React.FC = () => {
                   <div className="space-y-4">
                     <div className="flex justify-between items-center"><span className="text-muted-foreground">Average Safety Score</span><span className="text-2xl font-bold text-primary">{avgSafetyScore}%</span></div>
                     <div className="flex justify-between items-center"><span className="text-muted-foreground">Total Recipes</span><span className="text-xl font-semibold">{recipes.length}</span></div>
-                    <div className="flex justify-between items-center"><span className="text-muted-foreground">Total Courses</span><span className="text-xl font-semibold">{courses.length}</span></div>
-                    <div className="flex justify-between items-center"><span className="text-muted-foreground">Total Lessons</span><span className="text-xl font-semibold">{lessons.length}</span></div>
+                    <div className="flex justify-between items-center"><span className="text-muted-foreground">Registered Users</span><span className="text-xl font-semibold">{totalUsers}</span></div>
                   </div>
                 </CardContent>
               </Card>
@@ -1298,63 +752,6 @@ const Admin: React.FC = () => {
             </div>
           </TabsContent>
 
-          {/* Settings Tab */}
-          <TabsContent value="settings">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Settings className="h-5 w-5" />Certificate Settings</CardTitle>
-                <CardDescription>Manage director signature for certificates</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-6">
-                  <div>
-                    <Label className="text-base font-semibold mb-3 block">Director Signature</Label>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      Upload the director's signature image. This will appear on all certificates when students download them.
-                    </p>
-                    
-                    {signatureUrl ? (
-                      <div className="space-y-4">
-                        <div className="border rounded-lg p-6 bg-muted/30 flex flex-col items-center gap-4">
-                          <p className="text-sm text-muted-foreground">Current Signature:</p>
-                          <img src={signatureUrl + '?t=' + Date.now()} alt="Director Signature" className="max-h-24 max-w-xs object-contain" />
-                        </div>
-                        <div className="flex gap-3">
-                          <Button variant="outline" onClick={() => document.getElementById('sig-upload')?.click()}>
-                            <Upload className="h-4 w-4 mr-2" />Replace Signature
-                          </Button>
-                          <Button variant="destructive" size="sm" onClick={handleRemoveSignature}>
-                            <Trash2 className="h-4 w-4 mr-2" />Remove
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="border-2 border-dashed rounded-lg p-8 text-center">
-                        <Image className="h-10 w-10 mx-auto text-muted-foreground/50 mb-3" />
-                        <p className="text-muted-foreground mb-3">No signature uploaded yet</p>
-                        <Button onClick={() => document.getElementById('sig-upload')?.click()} disabled={uploadingSignature}>
-                          <Upload className="h-4 w-4 mr-2" />
-                          {uploadingSignature ? 'Uploading...' : 'Upload Signature'}
-                        </Button>
-                      </div>
-                    )}
-                    
-                    <input
-                      id="sig-upload"
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleSignatureUpload}
-                    />
-                    
-                    <p className="text-xs text-muted-foreground mt-3">
-                      Recommended: PNG with transparent background, approximately 300×100 pixels.
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
         </Tabs>
       </div>
     </Layout>
