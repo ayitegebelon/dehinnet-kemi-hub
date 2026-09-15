@@ -121,7 +121,7 @@ const Admin: React.FC = () => {
       return;
     }
     fetchData();
-    fetchSignature();
+    
   }, [isAdmin, isSuperAdmin, navigate]);
 
   const fetchData = async () => {
