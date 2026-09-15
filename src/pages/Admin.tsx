@@ -242,11 +242,8 @@ const Admin: React.FC = () => {
     try {
       // Delete related data first
       await Promise.all([
-        supabase.from('user_progress').delete().eq('user_id', u.user_id),
         supabase.from('achievements').delete().eq('user_id', u.user_id),
-        supabase.from('certificates').delete().eq('user_id', u.user_id),
         supabase.from('experiments').delete().eq('user_id', u.user_id),
-        supabase.from('study_streaks').delete().eq('user_id', u.user_id),
         supabase.from('notifications').delete().eq('user_id', u.user_id),
         supabase.from('user_roles').delete().eq('user_id', u.user_id),
         supabase.from('lab_notebook').delete().eq('user_id', u.user_id),
