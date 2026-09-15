@@ -165,21 +165,13 @@ const Admin: React.FC = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [usersRes, recipesRes, coursesRes, lessonsRes, quizzesRes, attemptsRes] = await Promise.all([
+      const [usersRes, recipesRes] = await Promise.all([
         supabase.from('profiles').select('*').order('created_at', { ascending: false }),
         supabase.from('recipes').select('*').order('created_at', { ascending: false }),
-        supabase.from('courses').select('*').order('created_at', { ascending: false }),
-        supabase.from('lessons').select('*').order('order_index'),
-        supabase.from('quizzes').select('*').order('created_at'),
-        (supabase.from('quiz_attempts' as any) as any).select('*').order('completed_at', { ascending: false }),
       ]);
 
       if (usersRes.data) setUsers(usersRes.data);
       if (recipesRes.data) setRecipes(recipesRes.data);
-      if (coursesRes.data) setCourses(coursesRes.data as Course[]);
-      if (lessonsRes.data) setLessons(lessonsRes.data as Lesson[]);
-      if (quizzesRes.data) setQuizzes(quizzesRes.data as Quiz[]);
-      if (attemptsRes.data) setFlaggedAttempts((attemptsRes.data as unknown as QuizAttempt[]).filter(a => a.flagged || a.integrity_score < 80));
     } catch (error) {
       console.error('Error fetching data:', error);
       toast.error('Failed to load data');
