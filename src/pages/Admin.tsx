@@ -554,18 +554,11 @@ const Admin: React.FC = () => {
 
         {/* Tabs */}
         <Tabs value={selectedTab} onValueChange={setSelectedTab}>
-          <TabsList className="grid w-full grid-cols-8 mb-6">
+          <TabsList className="grid w-full grid-cols-4 mb-6">
             <TabsTrigger value="users" className="flex items-center gap-1 text-xs"><Users className="h-4 w-4" />{t('admin.users')}</TabsTrigger>
             <TabsTrigger value="recipes" className="flex items-center gap-1 text-xs"><FlaskConical className="h-4 w-4" />{t('admin.recipes')}</TabsTrigger>
-            <TabsTrigger value="courses" className="flex items-center gap-1 text-xs"><BookOpen className="h-4 w-4" />Courses</TabsTrigger>
-            <TabsTrigger value="quizzes" className="flex items-center gap-1 text-xs"><HelpCircle className="h-4 w-4" />Quizzes</TabsTrigger>
             <TabsTrigger value="notifications" className="flex items-center gap-1 text-xs"><Bell className="h-4 w-4" />Notify</TabsTrigger>
-            <TabsTrigger value="integrity" className="flex items-center gap-1 text-xs">
-              <AlertTriangle className="h-4 w-4" />Integrity
-              {flaggedAttempts.length > 0 && <Badge variant="destructive" className="text-[10px] px-1.5 py-0">{flaggedAttempts.length}</Badge>}
-            </TabsTrigger>
             <TabsTrigger value="analytics" className="flex items-center gap-1 text-xs"><BarChart3 className="h-4 w-4" />{t('admin.analytics')}</TabsTrigger>
-            <TabsTrigger value="settings" className="flex items-center gap-1 text-xs"><Settings className="h-4 w-4" />Settings</TabsTrigger>
           </TabsList>
 
           {/* Users Tab */}
