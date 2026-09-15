@@ -48,55 +48,6 @@ interface Recipe {
   created_at: string;
 }
 
-interface Course {
-  id: string;
-  title_en: string;
-  title_am: string;
-  category: string;
-  difficulty: string;
-  is_premium: boolean;
-  total_lessons: number;
-}
-
-interface Lesson {
-  id: string;
-  course_id: string;
-  title_en: string;
-  title_am: string;
-  video_url: string | null;
-  order_index: number;
-  duration_minutes: number;
-  content_en: string | null;
-  content_am: string | null;
-}
-
-interface Quiz {
-  id: string;
-  lesson_id: string;
-  question_en: string;
-  question_am: string;
-  options: string[];
-  correct_answer: number;
-  explanation_en: string | null;
-  explanation_am: string | null;
-}
-
-interface QuizAttempt {
-  id: string;
-  user_id: string;
-  lesson_id: string;
-  course_id: string;
-  quiz_score: number;
-  integrity_score: number;
-  tab_switch_count: number;
-  copy_paste_count: number;
-  focus_lost_count: number;
-  rapid_answer_count: number;
-  flagged: boolean;
-  warnings: string[];
-  student_name: string | null;
-  completed_at: string;
-}
 
 const Admin: React.FC = () => {
   const { t, language } = useLanguage();
